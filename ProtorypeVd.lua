@@ -598,13 +598,15 @@ InfoSurv.TextYAlignment = Enum.TextYAlignment.Top
 
 -- ====== LOGIKA AUTO PERFECT & ANTI FAIL (FIXED) ======
 
--- Fungsi untuk mengirim success ke generator
+-- Fungsi untuk mencari dan mengirim success ke generator
 local function SendGeneratorSuccess()
     pcall(function()
+        -- Cari semua RemoteEvent di workspace
         for _, obj in pairs(Workspace:GetDescendants()) do
             if obj:IsA("RemoteEvent") then
                 local name = obj.Name:lower()
-                if name:find("skill") or name:find("generator") or name:find("gen") or name:find("success") or name:find("complete") then
+                -- Cari event yang berhubungan dengan generator/skillcheck
+                if name:find("skill") or name:find("generator") or name:find("gen") or name:find("success") or name:find("complete") or name:find("done") then
                     pcall(function()
                         obj:FireServer()
                     end)
@@ -614,16 +616,38 @@ local function SendGeneratorSuccess()
     end)
 end
 
--- AUTO PERFECT - Loop cepat
+-- Fungsi untuk force stop generator (biar gak stuck)
+local function ForceStopGenerator()
+    pcall(function()
+        local player = Players.LocalPlayer
+        if player and player.Character then
+            local humanoid = player.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                -- Force stop semua animasi
+                for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+                    track:Stop()
+                end
+            end
+            -- Reset velocity biar bisa gerak
+            local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end)
+end
+
+-- AUTO PERFECT - Loop sangat cepat
 spawn(function()
-    while wait(0.05) do
+    while wait(0.03) do
         if autoPerfect then
             SendGeneratorSuccess()
         end
     end
 end)
 
--- ANTI FAIL - Cegah fail/explode dan kirim success biar gak stuck
+-- ANTI FAIL - Cegah fail/explode
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall
@@ -632,10 +656,27 @@ if mt then
     mt.__namecall = newcclosure(function(self, ...)
         local method = getnamecallmethod()
         
-        if antiFail and (method == "FireServer" or method == "InvokeServer") then
+        if (autoPerfect or antiFail) and (method == "FireServer" or method == "InvokeServer") then
             local selfStr = tostring(self):lower()
-            if selfStr:find("fail") or selfStr:find("explode") or selfStr:find("skillcheck") then
-                -- Kirim success biar state selesai dan gak stuck
+            
+            -- Cegah fail/explode
+            if antiFail and (selfStr:find("fail") or selfStr:find("explode") or selfStr:find("skillcheck")) then
+                -- Kirim success biar state selesai
+                pcall(function()
+                    if self and self.Parent then
+                        local successEvent = self.Parent:FindFirstChild("Success") or self.Parent:FindFirstChild("Complete") or self.Parent:FindFirstChild("Done")
+                        if successEvent and successEvent:IsA("RemoteEvent") then
+                            successEvent:FireServer()
+                        end
+                    end
+                end)
+                -- Force stop generator biar gak stuck
+                ForceStopGenerator()
+                return nil
+            end
+            
+            -- Auto Perfect - selalu success
+            if autoPerfect and (selfStr:find("skill") or selfStr:find("generator") or selfStr:find("gen")) then
                 pcall(function()
                     if self and self.Parent then
                         local successEvent = self.Parent:FindFirstChild("Success") or self.Parent:FindFirstChild("Complete") or self.Parent:FindFirstChild("Done")
@@ -654,7 +695,7 @@ if mt then
     setreadonly(mt, true)
 end
 
--- ANTI FAIL - Backup loop untuk cegah stuck
+-- ANTI FAIL - Backup loop
 spawn(function()
     while wait(0.1) do
         if antiFail then
@@ -673,31 +714,26 @@ spawn(function()
                         end
                     end
                 end
+                -- Force stop generator
+                ForceStopGenerator()
             end)
         end
         wait(0.5)
     end
 end)
 
--- FIX KARAKTER STUCK - Reset velocity
+-- AUTO PERFECT - Backup force stop
 spawn(function()
-    while wait(0.3) do
-        if antiFail then
-            pcall(function()
-                local player = Players.LocalPlayer
-                if player and player.Character then
-                    local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                    if rootPart then
-                        -- Reset velocity biar gak stuck
-                        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                        rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                    end
-                end
-            end)
+    while wait(0.1) do
+        if autoPerfect then
+            -- Kirim success terus menerus
+            SendGeneratorSuccess()
+            -- Force stop biar gak stuck
+            ForceStopGenerator()
         end
+        wait(0.2)
     end
 end)
-
 -- ====== TAB NAVIGATION ======
 local function ShowPage(page, tab)
     Page0.Visible = false
