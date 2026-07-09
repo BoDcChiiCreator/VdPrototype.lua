@@ -538,7 +538,7 @@ SurvPlaceholder.Font = Enum.Font.SourceSans
 SurvPlaceholder.TextXAlignment = Enum.TextXAlignment.Center
 SurvPlaceholder.TextYAlignment = Enum.TextYAlignment.Center
 
--- ====== PAGE 4: SETTINGS (Low Graphics Mode) ======
+-- ====== PAGE 4: SETTINGS (Low Graphics Mode - Grayscale) ======
 local SettingsFrame = Instance.new("Frame", Page4)
 SettingsFrame.Size = UDim2.new(1, 0, 1, 0)
 SettingsFrame.BackgroundTransparency = 1
@@ -562,7 +562,7 @@ local function ToggleSettings(btn, state)
     return state
 end
 
--- Fungsi Low Graphics (Hapus Detail Maps, bukan ubah warna)
+-- Fungsi Low Graphics (Grayscale - warna dihilangkan, objek tetap terlihat)
 local function ApplyLowGraphics(state)
     if state then
         for _, obj in pairs(Workspace:GetDescendants()) do
@@ -576,22 +576,23 @@ local function ApplyLowGraphics(state)
                 continue
             end
             
-            -- Hapus detail part (BasePart)
+            -- Ubah warna part menjadi abu-abu (grayscale)
             if obj:IsA("BasePart") and not obj:IsA("Terrain") then
                 if not savedParts[obj] then
                     savedParts[obj] = {
-                        Material = obj.Material,
                         Color = obj.Color,
+                        Material = obj.Material,
                         Transparency = obj.Transparency,
                         Reflectance = obj.Reflectance
                     }
                 end
-                -- Jadikan transparan/hampir tidak terlihat
-                obj.Material = Enum.Material.ForceField
-                obj.Transparency = 0.9
+                -- Warna abu-abu (grayscale) - objek tetap terlihat jelas
+                obj.Color = Color3.fromRGB(120, 120, 120)
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.Transparency = 0
                 obj.Reflectance = 0
                 
-            -- Hapus Texture/Decal
+            -- Hapus Texture/Decal (biar gak ada warna dari tekstur)
             elseif obj:IsA("Texture") or obj:IsA("Decal") then
                 if not savedParts[obj] then
                     savedParts[obj] = {
@@ -600,7 +601,7 @@ local function ApplyLowGraphics(state)
                 end
                 obj.Transparency = 1
                 
-            -- Matikan efek
+            -- Matikan efek (biar ringan)
             elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
                 if not savedParts[obj] then
                     savedParts[obj] = {
@@ -609,7 +610,7 @@ local function ApplyLowGraphics(state)
                 end
                 obj.Enabled = false
                 
-            -- Hapus efek cahaya
+            -- Matikan cahaya
             elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
                 if not savedParts[obj] then
                     savedParts[obj] = {
@@ -624,8 +625,8 @@ local function ApplyLowGraphics(state)
         for obj, data in pairs(savedParts) do
             if obj and obj.Parent then
                 if obj:IsA("BasePart") then
-                    obj.Material = data.Material
                     obj.Color = data.Color
+                    obj.Material = data.Material
                     obj.Transparency = data.Transparency
                     obj.Reflectance = data.Reflectance
                 elseif obj:IsA("Texture") or obj:IsA("Decal") then
@@ -675,7 +676,7 @@ local InfoLow = Instance.new("TextLabel", SettingsFrame)
 InfoLow.Size = UDim2.new(1, -10, 0, 40)
 InfoLow.Position = UDim2.new(0, 5, 0, 40)
 InfoLow.BackgroundTransparency = 1
-InfoLow.Text = "🔘 Menghilangkan detail maps (warna, tekstur, efek)\n🔘 Generator dan Pallet tetap terlihat"
+InfoLow.Text = "🔘 Mengubah warna maps menjadi abu-abu (grayscale)\n🔘 Menghilangkan tekstur & efek (lebih ringan)\n🔘 Generator dan Pallet tetap berwarna"
 InfoLow.TextColor3 = Color3.fromRGB(150, 150, 150)
 InfoLow.TextSize = 11
 InfoLow.Font = Enum.Font.SourceSans
