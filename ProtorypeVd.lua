@@ -6,6 +6,30 @@ local TweenService = game:GetService("TweenService")
 if CoreGui:FindFirstChild("BD_UI") then CoreGui.BD_UI:Destroy() end
 if CoreGui:FindFirstChild("BD_Toggle") then CoreGui.BD_Toggle:Destroy() end
 
+-- ====== FUNGSI SUARA ======
+local function PlaySound(soundId, volume, pitch)
+    volume = volume or 0.3
+    pitch = pitch or 1
+    
+    local sound = Instance.new("Sound")
+    sound.SoundId = soundId
+    sound.Volume = volume
+    sound.Pitch = pitch
+    sound.Parent = CoreGui
+    sound:Play()
+    
+    sound.Ended:Connect(function()
+        sound:Destroy()
+    end)
+end
+
+-- Suara bawaan Roblox
+local SOUNDS = {
+    CLICK = "rbxasset://sounds/buttonclick.mp3",
+    POP = "rbxasset://sounds/rewind.wav",
+    ERROR = "rbxasset://sounds/error.mp3",
+}
+
 -- ====== SCREEN GUI INDUK ======
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "BD_UI"
@@ -39,15 +63,15 @@ local function EnableDrag(gui)
     end)
 end
 
--- ====== TOMBOL TAB "BD" (KIRI - DIPERKECIL) ======
+-- ====== TOMBOL TAB "BD" (KIRI) ======
 local ToggleGui = Instance.new("ScreenGui", CoreGui)
 ToggleGui.Name = "BD_Toggle"
 
 local TabBtn = Instance.new("TextButton", ToggleGui)
-TabBtn.Size = UDim2.new(0, 50, 0, 50)  -- Dikecilkan dari 80 ke 50
+TabBtn.Size = UDim2.new(0, 50, 0, 50)
 TabBtn.Position = UDim2.new(0, 10, 0.5, -25)
 TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-TabBtn.Text = "BD"  -- Disingkat jadi BD
+TabBtn.Text = "BD"
 TabBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
 TabBtn.TextSize = 18
 TabBtn.Font = Enum.Font.SourceSansBold
@@ -66,6 +90,11 @@ spawn(function()
 end)
 
 EnableDrag(TabBtn)
+
+-- Suara klik tombol BD
+TabBtn.MouseButton1Click:Connect(function()
+    PlaySound(SOUNDS.CLICK, 0.2)
+end)
 
 -- ====== MAIN UI ======
 local MainFrame = Instance.new("Frame", ScreenGui)
@@ -126,6 +155,11 @@ CloseBtn.MouseEnter:Connect(function()
 end)
 CloseBtn.MouseLeave:Connect(function()
     CloseBtn.BackgroundTransparency = 0.3
+end)
+
+-- Suara klik tombol tutup
+CloseBtn.MouseButton1Click:Connect(function()
+    PlaySound(SOUNDS.CLICK, 0.2)
 end)
 
 -- ====== LAYOUT SPLIT ======
@@ -192,6 +226,11 @@ local function CreateSidebarItem(text)
     stroke.Color = Color3.fromRGB(255, 105, 180)
     stroke.Thickness = 1
     stroke.Transparency = 0.5
+    
+    -- Suara klik untuk setiap tab
+    btn.MouseButton1Click:Connect(function()
+        PlaySound(SOUNDS.CLICK, 0.15)
+    end)
     
     return btn
 end
@@ -323,7 +362,7 @@ Line2.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 Line2.BackgroundTransparency = 0.5
 Line2.BorderSizePixel = 0
 
--- Info Script (DIKOSONGKAN - masih prototype)
+-- Info Script
 local ScriptFrame = Instance.new("Frame", AboutFrame)
 ScriptFrame.Size = UDim2.new(1, 0, 0, 60)
 ScriptFrame.Position = UDim2.new(0, 0, 0, 190)
@@ -392,6 +431,9 @@ local function ShowPage(page, tab)
     if tab.UIStroke then
         tab.UIStroke.Transparency = 0
     end
+    
+    -- Suara pop saat pindah tab
+    PlaySound(SOUNDS.POP, 0.15)
 end
 
 AboutTab.MouseButton1Click:Connect(function() ShowPage(Page0, AboutTab) end)
@@ -411,11 +453,13 @@ TabBtn.MouseButton1Click:Connect(function()
         MainFrame.Visible = true
         MainFrame:TweenSize(UDim2.new(0, 400, 0, 280), "Out", "Back", 0.4, true)
         TabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+        PlaySound(SOUNDS.POP, 0.3)  -- Suara buka UI
     else
         MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true, function()
             MainFrame.Visible = false
         end)
         TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+        PlaySound(SOUNDS.CLICK, 0.2)  -- Suara tutup UI
     end
 end)
 
@@ -425,4 +469,5 @@ CloseBtn.MouseButton1Click:Connect(function()
         MainFrame.Visible = false
     end)
     TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    PlaySound(SOUNDS.CLICK, 0.2)  -- Suara tutup UI
 end)
