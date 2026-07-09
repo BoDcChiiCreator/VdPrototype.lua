@@ -242,7 +242,6 @@ end
 local AboutTab = CreateSidebarItem("0. About")
 local Tab1 = CreateSidebarItem("1. Player ESP")
 local Tab2 = CreateSidebarItem("2. Survival")
-local Tab4 = CreateSidebarItem("3. Settings")
 
 -- ====== CONTENT PAGES ======
 local function CreatePage()
@@ -256,7 +255,6 @@ end
 local Page0 = CreatePage()
 local Page1 = CreatePage()
 local Page2 = CreatePage()
-local Page4 = CreatePage()
 
 -- ====== PAGE 0: ABOUT ======
 local AboutFrame = Instance.new("Frame", Page0)
@@ -524,32 +522,17 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
--- ====== PAGE 2: SURVIVAL (Placeholder) ======
+-- ====== PAGE 2: SURVIVAL (Auto Perfect Generator & Anti Fail) ======
 local SurvFrame = Instance.new("Frame", Page2)
 SurvFrame.Size = UDim2.new(1, 0, 1, 0)
 SurvFrame.BackgroundTransparency = 1
 
-local SurvPlaceholder = Instance.new("TextLabel", SurvFrame)
-SurvPlaceholder.Size = UDim2.new(1, 0, 1, 0)
-SurvPlaceholder.BackgroundTransparency = 1
-SurvPlaceholder.Text = "⚙️ Survival Features\nComing Soon..."
-SurvPlaceholder.TextColor3 = Color3.fromRGB(150, 150, 150)
-SurvPlaceholder.TextSize = 14
-SurvPlaceholder.Font = Enum.Font.SourceSans
-SurvPlaceholder.TextXAlignment = Enum.TextXAlignment.Center
-SurvPlaceholder.TextYAlignment = Enum.TextYAlignment.Center
-
--- ====== PAGE 4: SETTINGS (Potato Mode - Pencahayaan TETAP) ======
-local SettingsFrame = Instance.new("Frame", Page4)
-SettingsFrame.Size = UDim2.new(1, 0, 1, 0)
-SettingsFrame.BackgroundTransparency = 1
-
--- Variabel Potato Mode
-local potatoMode = false
-local savedParts = {}
+-- Variabel fitur Survival
+local autoPerfect = false
+local antiFail = false
 
 -- Fungsi toggle dengan warna ON=Hijau, OFF=Merah
-local function TogglePotato(btn, state)
+local function ToggleSurv(btn, state)
     state = not state
     if state then
         btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
@@ -563,127 +546,142 @@ local function TogglePotato(btn, state)
     return state
 end
 
--- Fungsi Potato Mode (dari script lama, Pencahayaan TETAP)
-local function ApplyPotatoMode(state)
-    if state then
-        for _, v in pairs(Workspace:GetDescendants()) do
-            -- Cek apakah objek adalah Player atau Generator/Pallet
-            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
-            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
-            
-            -- Lewati Player, Generator, dan Pallet
-            if not isPlayer and not isImportant then
-                -- Simpan data asli
-                if not savedParts[v] then
-                    savedParts[v] = {}
-                    if v:IsA("BasePart") then
-                        savedParts[v].Material = v.Material
-                        savedParts[v].Color = v.Color
-                        savedParts[v].Transparency = v.Transparency
-                        savedParts[v].Reflectance = v.Reflectance
-                    elseif v:IsA("Texture") or v:IsA("Decal") then
-                        savedParts[v].Transparency = v.Transparency
-                    elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                        savedParts[v].Enabled = v.Enabled
-                    elseif v:IsA("SpecialMesh") then
-                        savedParts[v].TextureId = v.TextureId
-                    end
-                end
-                
-                -- Ubah ke mode potato
-                if v:IsA("BasePart") then
-                    v.Material = Enum.Material.SmoothPlastic
-                    v.Color = Color3.fromRGB(120, 120, 120)
-                    v.Transparency = 0
-                    v.Reflectance = 0
-                    if v:IsA("MeshPart") then
-                        v.TextureID = ""
-                    end
-                elseif v:IsA("Texture") or v:IsA("Decal") then
-                    v.Transparency = 1
-                elseif v:IsA("SurfaceAppearance") then
-                    v:Destroy()
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                    v.Enabled = false
-                elseif v:IsA("SpecialMesh") then
-                    v.TextureId = ""
-                end
-            end
-        end
-    else
-        -- Kembalikan semua yang sudah disimpan
-        for obj, data in pairs(savedParts) do
-            if obj and obj.Parent then
-                if obj:IsA("BasePart") then
-                    obj.Material = data.Material
-                    obj.Color = data.Color
-                    obj.Transparency = data.Transparency
-                    obj.Reflectance = data.Reflectance
-                    if obj:IsA("MeshPart") and data.TextureId then
-                        obj.TextureID = data.TextureId
-                    end
-                elseif obj:IsA("Texture") or obj:IsA("Decal") then
-                    obj.Transparency = data.Transparency
-                elseif obj:IsA("SurfaceAppearance") then
-                    -- SurfaceAppearance di-destroy, tidak bisa dikembalikan
-                elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-                    obj.Enabled = data.Enabled
-                elseif obj:IsA("SpecialMesh") then
-                    obj.TextureId = data.TextureId
-                end
-            end
-        end
-        savedParts = {}
-    end
-end
+-- ====== AUTO PERFECT GENERATOR ======
+local LabelPerfect = Instance.new("TextLabel", SurvFrame)
+LabelPerfect.Size = UDim2.new(1, -10, 0, 25)
+LabelPerfect.Position = UDim2.new(0, 5, 0, 5)
+LabelPerfect.BackgroundTransparency = 1
+LabelPerfect.Text = "Auto Perfect Generator"
+LabelPerfect.TextColor3 = Color3.fromRGB(0, 255, 200)
+LabelPerfect.TextSize = 13
+LabelPerfect.Font = Enum.Font.SourceSansBold
+LabelPerfect.TextXAlignment = Enum.TextXAlignment.Left
 
--- Label "Potato Mode"
-local LabelPotato = Instance.new("TextLabel", SettingsFrame)
-LabelPotato.Size = UDim2.new(1, -10, 0, 25)
-LabelPotato.Position = UDim2.new(0, 5, 0, 5)
-LabelPotato.BackgroundTransparency = 1
-LabelPotato.Text = "Potato Mode"
-LabelPotato.TextColor3 = Color3.fromRGB(180, 180, 180)
-LabelPotato.TextSize = 14
-LabelPotato.Font = Enum.Font.SourceSansBold
-LabelPotato.TextXAlignment = Enum.TextXAlignment.Left
+local PerfectBtn = Instance.new("TextButton", SurvFrame)
+PerfectBtn.Size = UDim2.new(0, 60, 0, 30)
+PerfectBtn.Position = UDim2.new(1, -65, 0, 5)
+PerfectBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+PerfectBtn.Text = "OFF"
+PerfectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+PerfectBtn.TextSize = 14
+PerfectBtn.Font = Enum.Font.SourceSansBold
+PerfectBtn.BorderSizePixel = 0
+Instance.new("UICorner", PerfectBtn).CornerRadius = UDim.new(0, 6)
 
--- Tombol ON/OFF Potato Mode
-local PotatoBtn = Instance.new("TextButton", SettingsFrame)
-PotatoBtn.Size = UDim2.new(0, 60, 0, 30)
-PotatoBtn.Position = UDim2.new(1, -65, 0, 5)
-PotatoBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-PotatoBtn.Text = "OFF"
-PotatoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-PotatoBtn.TextSize = 14
-PotatoBtn.Font = Enum.Font.SourceSansBold
-PotatoBtn.BorderSizePixel = 0
-Instance.new("UICorner", PotatoBtn).CornerRadius = UDim.new(0, 6)
-
-PotatoBtn.MouseButton1Click:Connect(function()
-    potatoMode = TogglePotato(PotatoBtn, potatoMode)
-    ApplyPotatoMode(potatoMode)
+PerfectBtn.MouseButton1Click:Connect(function()
+    autoPerfect = ToggleSurv(PerfectBtn, autoPerfect)
     PlaySound(SOUNDS.CLICK, 0.15)
 end)
 
--- Info Potato Mode
-local InfoPotato = Instance.new("TextLabel", SettingsFrame)
-InfoPotato.Size = UDim2.new(1, -10, 0, 50)
-InfoPotato.Position = UDim2.new(0, 5, 0, 40)
-InfoPotato.BackgroundTransparency = 1
-InfoPotato.Text = "🥔 Mode hemat performa untuk HP kentang\n🔘 Menghilangkan warna & tekstur maps\n🔘 Mematikan efek (partikel, api, asap)\n🔘 Pencahayaan TETAP menyala\n🔘 Generator dan Pallet tetap terlihat"
-InfoPotato.TextColor3 = Color3.fromRGB(150, 150, 150)
-InfoPotato.TextSize = 10
-InfoPotato.Font = Enum.Font.SourceSans
-InfoPotato.TextXAlignment = Enum.TextXAlignment.Left
-InfoPotato.TextYAlignment = Enum.TextYAlignment.Top
+-- ====== ANTI FAIL GENERATOR ======
+local LabelAntiFail = Instance.new("TextLabel", SurvFrame)
+LabelAntiFail.Size = UDim2.new(1, -10, 0, 25)
+LabelAntiFail.Position = UDim2.new(0, 5, 0, 40)
+LabelAntiFail.BackgroundTransparency = 1
+LabelAntiFail.Text = "Anti Fail Generator"
+LabelAntiFail.TextColor3 = Color3.fromRGB(255, 200, 0)
+LabelAntiFail.TextSize = 13
+LabelAntiFail.Font = Enum.Font.SourceSansBold
+LabelAntiFail.TextXAlignment = Enum.TextXAlignment.Left
+
+local AntiFailBtn = Instance.new("TextButton", SurvFrame)
+AntiFailBtn.Size = UDim2.new(0, 60, 0, 30)
+AntiFailBtn.Position = UDim2.new(1, -65, 0, 40)
+AntiFailBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+AntiFailBtn.Text = "OFF"
+AntiFailBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AntiFailBtn.TextSize = 14
+AntiFailBtn.Font = Enum.Font.SourceSansBold
+AntiFailBtn.BorderSizePixel = 0
+Instance.new("UICorner", AntiFailBtn).CornerRadius = UDim.new(0, 6)
+
+AntiFailBtn.MouseButton1Click:Connect(function()
+    antiFail = ToggleSurv(AntiFailBtn, antiFail)
+    PlaySound(SOUNDS.CLICK, 0.15)
+end)
+
+-- Info Survival
+local InfoSurv = Instance.new("TextLabel", SurvFrame)
+InfoSurv.Size = UDim2.new(1, -10, 0, 40)
+InfoSurv.Position = UDim2.new(0, 5, 0, 75)
+InfoSurv.BackgroundTransparency = 1
+InfoSurv.Text = "⚡ Auto Perfect = Skill check selalu sempurna\n🛡️ Anti Fail = Generator tidak pernah meledak"
+InfoSurv.TextColor3 = Color3.fromRGB(150, 150, 150)
+InfoSurv.TextSize = 10
+InfoSurv.Font = Enum.Font.SourceSans
+InfoSurv.TextXAlignment = Enum.TextXAlignment.Left
+InfoSurv.TextYAlignment = Enum.TextYAlignment.Top
+
+-- ====== LOGIKA AUTO PERFECT & ANTI FAIL ======
+-- Hook ke metatable untuk mencegah fail/explode
+local mt = getrawmetatable(game)
+if mt then
+    local old = mt.__namecall
+    setreadonly(mt, false)
+    
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        
+        -- Anti Fail Generator - Cegah fail/explode
+        if antiFail and (method == "FireServer" or method == "InvokeServer") then
+            local selfStr = tostring(self):lower()
+            if selfStr:find("fail") or selfStr:find("explode") or selfStr:find("skillcheck") then
+                return nil
+            end
+        end
+        
+        -- Auto Perfect Generator - Selalu success
+        if autoPerfect and (method == "FireServer" or method == "InvokeServer") then
+            local selfStr = tostring(self):lower()
+            if selfStr:find("skillcheck") or selfStr:find("generator") then
+                pcall(function()
+                    if self and self.Parent then
+                        local successEvent = self.Parent:FindFirstChild("Success") or self.Parent:FindFirstChild("Complete")
+                        if successEvent and successEvent:IsA("RemoteEvent") then
+                            successEvent:FireServer()
+                        end
+                    end
+                end)
+                return nil
+            end
+        end
+        
+        return old(self, ...)
+    end)
+    
+    setreadonly(mt, true)
+end
+
+-- Auto Perfect - Loop untuk cegah fail
+spawn(function()
+    while wait(0.1) do
+        if autoPerfect then
+            pcall(function()
+                for _, obj in pairs(Workspace:GetDescendants()) do
+                    if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+                        local name = obj.Name:lower()
+                        if name:find("skill") or name:find("generator") or name:find("gen") then
+                            local parent = obj.Parent
+                            if parent then
+                                local success = parent:FindFirstChild("Success") or parent:FindFirstChild("Complete") or parent:FindFirstChild("Done")
+                                if success and success:IsA("RemoteEvent") then
+                                    success:FireServer()
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+        wait(0.5)
+    end
+end)
 
 -- ====== TAB NAVIGATION ======
 local function ShowPage(page, tab)
     Page0.Visible = false
     Page1.Visible = false
     Page2.Visible = false
-    Page4.Visible = false
     
     for _, child in ipairs(SidebarScroll:GetChildren()) do
         if child:IsA("TextButton") then
@@ -707,7 +705,6 @@ end
 AboutTab.MouseButton1Click:Connect(function() ShowPage(Page0, AboutTab) end)
 Tab1.MouseButton1Click:Connect(function() ShowPage(Page1, Tab1) end)
 Tab2.MouseButton1Click:Connect(function() ShowPage(Page2, Tab2) end)
-Tab4.MouseButton1Click:Connect(function() ShowPage(Page4, Tab4) end)
 
 ShowPage(Page0, AboutTab)
 
