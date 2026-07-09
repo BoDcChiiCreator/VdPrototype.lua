@@ -2,6 +2,8 @@
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 if CoreGui:FindFirstChild("BD_UI") then CoreGui.BD_UI:Destroy() end
 if CoreGui:FindFirstChild("BD_Toggle") then CoreGui.BD_Toggle:Destroy() end
@@ -389,6 +391,132 @@ ScriptInfo.Font = Enum.Font.SourceSans
 ScriptInfo.TextXAlignment = Enum.TextXAlignment.Left
 ScriptInfo.TextYAlignment = Enum.TextYAlignment.Top
 
+-- ====== PAGE 1: PLAYER ESP ======
+local EspFrame = Instance.new("Frame", Page1)
+EspFrame.Size = UDim2.new(1, 0, 1, 0)
+EspFrame.BackgroundTransparency = 1
+
+-- Variabel ESP
+local espSurvival = false
+local espKiller = false
+
+-- Fungsi toggle
+local function ToggleESP(btn, state, text)
+    state = not state
+    btn.Text = text .. (state and " ✅" or " ❌")
+    btn.BackgroundColor3 = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(25, 25, 35)
+    return state
+end
+
+-- Fungsi update ESP
+local function UpdateESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= Players.LocalPlayer and player.Character then
+            local highlight = player.Character:FindFirstChild("BD_EspHighlight")
+            
+            if not highlight then
+                highlight = Instance.new("Highlight")
+                highlight.Name = "BD_EspHighlight"
+                highlight.Parent = player.Character
+            end
+            
+            local isKiller = false
+            if player.Team and player.Team.Name:lower():find("kill") then
+                isKiller = true
+            elseif player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.MaxHealth > 100 then
+                isKiller = true
+            end
+            
+            if isKiller and espKiller then
+                highlight.Enabled = true
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+            elseif not isKiller and espSurvival then
+                highlight.Enabled = true
+                highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+            else
+                highlight.Enabled = false
+            end
+        end
+    end
+end
+
+-- Tombol ESP Survival
+local EspSurvBtn = Instance.new("TextButton", EspFrame)
+EspSurvBtn.Size = UDim2.new(1, -10, 0, 35)
+EspSurvBtn.Position = UDim2.new(0, 5, 0, 5)
+EspSurvBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+EspSurvBtn.Text = "ESP Survival ❌"
+EspSurvBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+EspSurvBtn.TextSize = 12
+EspSurvBtn.Font = Enum.Font.SourceSansBold
+EspSurvBtn.BorderSizePixel = 0
+Instance.new("UICorner", EspSurvBtn).CornerRadius = UDim.new(0, 6)
+
+local stroke1 = Instance.new("UIStroke", EspSurvBtn)
+stroke1.Color = Color3.fromRGB(0, 255, 0)
+stroke1.Thickness = 1
+stroke1.Transparency = 0.5
+
+EspSurvBtn.MouseButton1Click:Connect(function()
+    espSurvival = ToggleESP(EspSurvBtn, espSurvival, "ESP Survival")
+    UpdateESP()
+    PlaySound(SOUNDS.CLICK, 0.15)
+end)
+
+-- Tombol ESP Killer
+local EspKillBtn = Instance.new("TextButton", EspFrame)
+EspKillBtn.Size = UDim2.new(1, -10, 0, 35)
+EspKillBtn.Position = UDim2.new(0, 5, 0, 45)
+EspKillBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+EspKillBtn.Text = "ESP Killer ❌"
+EspKillBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+EspKillBtn.TextSize = 12
+EspKillBtn.Font = Enum.Font.SourceSansBold
+EspKillBtn.BorderSizePixel = 0
+Instance.new("UICorner", EspKillBtn).CornerRadius = UDim.new(0, 6)
+
+local stroke2 = Instance.new("UIStroke", EspKillBtn)
+stroke2.Color = Color3.fromRGB(255, 0, 0)
+stroke2.Thickness = 1
+stroke2.Transparency = 0.5
+
+EspKillBtn.MouseButton1Click:Connect(function()
+    espKiller = ToggleESP(EspKillBtn, espKiller, "ESP Killer")
+    UpdateESP()
+    PlaySound(SOUNDS.CLICK, 0.15)
+end)
+
+-- Info text
+local InfoText = Instance.new("TextLabel", EspFrame)
+InfoText.Size = UDim2.new(1, -10, 0, 40)
+InfoText.Position = UDim2.new(0, 5, 0, 85)
+InfoText.BackgroundTransparency = 1
+InfoText.Text = "🟢 Survival = Hijau\n🔴 Killer = Merah"
+InfoText.TextColor3 = Color3.fromRGB(180, 180, 180)
+InfoText.TextSize = 11
+InfoText.Font = Enum.Font.SourceSans
+InfoText.TextXAlignment = Enum.TextXAlignment.Left
+InfoText.TextYAlignment = Enum.TextYAlignment.Top
+
+-- Update ESP otomatis
+spawn(function()
+    while wait(0.5) do
+        if espSurvival or espKiller then
+            UpdateESP()
+        end
+    end
+end)
+
+-- Cleanup saat player keluar
+Players.PlayerRemoving:Connect(function(player)
+    if player.Character then
+        local highlight = player.Character:FindFirstChild("BD_EspHighlight")
+        if highlight then highlight:Destroy() end
+    end
+end)
+
 -- ====== PLACEHOLDER UNTUK PAGE LAIN ======
 local function CreatePlaceholder(page, text)
     local label = Instance.new("TextLabel", page)
@@ -403,7 +531,6 @@ local function CreatePlaceholder(page, text)
     return label
 end
 
-CreatePlaceholder(Page1, "⚙️ Player ESP Features\nComing Soon...")
 CreatePlaceholder(Page2, "⚙️ Survival Features\nComing Soon...")
 CreatePlaceholder(Page3, "⚙️ Smooth Maps Features\nComing Soon...")
 CreatePlaceholder(Page4, "⚙️ Settings\nComing Soon...")
@@ -453,13 +580,13 @@ TabBtn.MouseButton1Click:Connect(function()
         MainFrame.Visible = true
         MainFrame:TweenSize(UDim2.new(0, 400, 0, 280), "Out", "Back", 0.4, true)
         TabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-        PlaySound(SOUNDS.POP, 0.3)  -- Suara buka UI
+        PlaySound(SOUNDS.POP, 0.3)
     else
         MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true, function()
             MainFrame.Visible = false
         end)
         TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-        PlaySound(SOUNDS.CLICK, 0.2)  -- Suara tutup UI
+        PlaySound(SOUNDS.CLICK, 0.2)
     end
 end)
 
@@ -469,5 +596,5 @@ CloseBtn.MouseButton1Click:Connect(function()
         MainFrame.Visible = false
     end)
     TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    PlaySound(SOUNDS.CLICK, 0.2)  -- Suara tutup UI
+    PlaySound(SOUNDS.CLICK, 0.2)
 end)
