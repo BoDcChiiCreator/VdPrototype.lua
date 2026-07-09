@@ -39,20 +39,19 @@ local function EnableDrag(gui)
     end)
 end
 
--- ====== TOMBOL TAB "BoDcChii Creator" (KIRI) ======
+-- ====== TOMBOL TAB "BD" (KIRI - DIPERKECIL) ======
 local ToggleGui = Instance.new("ScreenGui", CoreGui)
 ToggleGui.Name = "BD_Toggle"
 
 local TabBtn = Instance.new("TextButton", ToggleGui)
-TabBtn.Size = UDim2.new(0, 80, 0, 80)
-TabBtn.Position = UDim2.new(0, 10, 0.5, -40)
+TabBtn.Size = UDim2.new(0, 50, 0, 50)  -- Dikecilkan dari 80 ke 50
+TabBtn.Position = UDim2.new(0, 10, 0.5, -25)
 TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-TabBtn.Text = "BoDcChii\nCreator"
+TabBtn.Text = "BD"  -- Disingkat jadi BD
 TabBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
-TabBtn.TextSize = 13
+TabBtn.TextSize = 18
 TabBtn.Font = Enum.Font.SourceSansBold
 TabBtn.BorderSizePixel = 0
-TabBtn.TextWrapped = true
 Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(1, 0)
 
 local TabStroke = Instance.new("UIStroke", TabBtn)
