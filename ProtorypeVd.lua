@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
 
 if CoreGui:FindFirstChild("BD_UI") then CoreGui.BD_UI:Destroy() end
 if CoreGui:FindFirstChild("BD_Toggle") then CoreGui.BD_Toggle:Destroy() end
@@ -538,17 +539,17 @@ SurvPlaceholder.Font = Enum.Font.SourceSans
 SurvPlaceholder.TextXAlignment = Enum.TextXAlignment.Center
 SurvPlaceholder.TextYAlignment = Enum.TextYAlignment.Center
 
--- ====== PAGE 4: SETTINGS (Low Graphics Mode - Grayscale, Pencahayaan TETAP) ======
+-- ====== PAGE 4: SETTINGS (Potato Mode - Pencahayaan TETAP) ======
 local SettingsFrame = Instance.new("Frame", Page4)
 SettingsFrame.Size = UDim2.new(1, 0, 1, 0)
 SettingsFrame.BackgroundTransparency = 1
 
--- Variabel Low Graphics
-local lowGraphics = false
+-- Variabel Potato Mode
+local potatoMode = false
 local savedParts = {}
 
 -- Fungsi toggle dengan warna ON=Hijau, OFF=Merah
-local function ToggleSettings(btn, state)
+local function TogglePotato(btn, state)
     state = not state
     if state then
         btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
@@ -562,69 +563,73 @@ local function ToggleSettings(btn, state)
     return state
 end
 
--- Fungsi Low Graphics (Grayscale - Pencahayaan TETAP)
-local function ApplyLowGraphics(state)
+-- Fungsi Potato Mode (dari script lama, Pencahayaan TETAP)
+local function ApplyPotatoMode(state)
     if state then
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            -- Cek apakah objek adalah Generator atau Pallet
-            local isGenerator = obj.Name:lower():find("generator") or obj.Name:lower():find("gen") or obj:FindFirstAncestor("Generator")
-            local isPallet = obj.Name:lower():find("pallet") or obj:FindFirstAncestor("Pallet")
-            local isPlayer = obj:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(obj:FindFirstAncestorOfClass("Model"))
+        for _, v in pairs(Workspace:GetDescendants()) do
+            -- Cek apakah objek adalah Player atau Generator/Pallet
+            local isPlayer = v:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(v:FindFirstAncestorOfClass("Model"))
+            local isImportant = v.Name:find("Gen") or v.Name:find("Generator") or v.Name:find("Pallet") or v:FindFirstAncestor("Generator") or v:FindFirstAncestor("Pallet")
             
-            -- Lewati Generator, Pallet, dan Player
-            if isGenerator or isPallet or isPlayer then
-                continue
-            end
-            
-            -- Ubah warna part menjadi abu-abu (grayscale)
-            if obj:IsA("BasePart") and not obj:IsA("Terrain") then
-                if not savedParts[obj] then
-                    savedParts[obj] = {
-                        Color = obj.Color,
-                        Material = obj.Material,
-                        Transparency = obj.Transparency,
-                        Reflectance = obj.Reflectance
-                    }
+            -- Lewati Player, Generator, dan Pallet
+            if not isPlayer and not isImportant then
+                -- Simpan data asli
+                if not savedParts[v] then
+                    savedParts[v] = {}
+                    if v:IsA("BasePart") then
+                        savedParts[v].Material = v.Material
+                        savedParts[v].Color = v.Color
+                        savedParts[v].Transparency = v.Transparency
+                        savedParts[v].Reflectance = v.Reflectance
+                    elseif v:IsA("Texture") or v:IsA("Decal") then
+                        savedParts[v].Transparency = v.Transparency
+                    elseif v:IsA("SurfaceAppearance") or v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                        savedParts[v].Enabled = v.Enabled
+                    elseif v:IsA("SpecialMesh") then
+                        savedParts[v].TextureId = v.TextureId
+                    end
                 end
-                -- Warna abu-abu (grayscale) - objek tetap terlihat jelas
-                obj.Color = Color3.fromRGB(120, 120, 120)
-                obj.Material = Enum.Material.SmoothPlastic
-                obj.Transparency = 0
-                obj.Reflectance = 0
                 
-            -- Hapus Texture/Decal (biar gak ada warna dari tekstur)
-            elseif obj:IsA("Texture") or obj:IsA("Decal") then
-                if not savedParts[obj] then
-                    savedParts[obj] = {
-                        Transparency = obj.Transparency
-                    }
+                -- Ubah ke mode potato
+                if v:IsA("BasePart") then
+                    v.Material = Enum.Material.SmoothPlastic
+                    v.Color = Color3.fromRGB(120, 120, 120)
+                    v.Transparency = 0
+                    v.Reflectance = 0
+                    if v:IsA("MeshPart") then
+                        v.TextureID = ""
+                    end
+                elseif v:IsA("Texture") or v:IsA("Decal") then
+                    v.Transparency = 1
+                elseif v:IsA("SurfaceAppearance") then
+                    v:Destroy()
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                    v.Enabled = false
+                elseif v:IsA("SpecialMesh") then
+                    v.TextureId = ""
                 end
-                obj.Transparency = 1
-                
-            -- Matikan efek (biar ringan)
-            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
-                if not savedParts[obj] then
-                    savedParts[obj] = {
-                        Enabled = obj.Enabled
-                    }
-                end
-                obj.Enabled = false
             end
-            -- Pencahayaan (Light) TIDAK disentuh! Tetap menyala
         end
     else
         -- Kembalikan semua yang sudah disimpan
         for obj, data in pairs(savedParts) do
             if obj and obj.Parent then
                 if obj:IsA("BasePart") then
-                    obj.Color = data.Color
                     obj.Material = data.Material
+                    obj.Color = data.Color
                     obj.Transparency = data.Transparency
                     obj.Reflectance = data.Reflectance
+                    if obj:IsA("MeshPart") and data.TextureId then
+                        obj.TextureID = data.TextureId
+                    end
                 elseif obj:IsA("Texture") or obj:IsA("Decal") then
                     obj.Transparency = data.Transparency
-                elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                elseif obj:IsA("SurfaceAppearance") then
+                    -- SurfaceAppearance di-destroy, tidak bisa dikembalikan
+                elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
                     obj.Enabled = data.Enabled
+                elseif obj:IsA("SpecialMesh") then
+                    obj.TextureId = data.TextureId
                 end
             end
         end
@@ -632,46 +637,46 @@ local function ApplyLowGraphics(state)
     end
 end
 
--- Label "Low Graphics Mode"
-local LabelLow = Instance.new("TextLabel", SettingsFrame)
-LabelLow.Size = UDim2.new(1, -10, 0, 25)
-LabelLow.Position = UDim2.new(0, 5, 0, 5)
-LabelLow.BackgroundTransparency = 1
-LabelLow.Text = "Low Graphics Mode"
-LabelLow.TextColor3 = Color3.fromRGB(180, 180, 180)
-LabelLow.TextSize = 14
-LabelLow.Font = Enum.Font.SourceSansBold
-LabelLow.TextXAlignment = Enum.TextXAlignment.Left
+-- Label "Potato Mode"
+local LabelPotato = Instance.new("TextLabel", SettingsFrame)
+LabelPotato.Size = UDim2.new(1, -10, 0, 25)
+LabelPotato.Position = UDim2.new(0, 5, 0, 5)
+LabelPotato.BackgroundTransparency = 1
+LabelPotato.Text = "Potato Mode"
+LabelPotato.TextColor3 = Color3.fromRGB(180, 180, 180)
+LabelPotato.TextSize = 14
+LabelPotato.Font = Enum.Font.SourceSansBold
+LabelPotato.TextXAlignment = Enum.TextXAlignment.Left
 
--- Tombol ON/OFF Low Graphics
-local LowBtn = Instance.new("TextButton", SettingsFrame)
-LowBtn.Size = UDim2.new(0, 60, 0, 30)
-LowBtn.Position = UDim2.new(1, -65, 0, 5)
-LowBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-LowBtn.Text = "OFF"
-LowBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-LowBtn.TextSize = 14
-LowBtn.Font = Enum.Font.SourceSansBold
-LowBtn.BorderSizePixel = 0
-Instance.new("UICorner", LowBtn).CornerRadius = UDim.new(0, 6)
+-- Tombol ON/OFF Potato Mode
+local PotatoBtn = Instance.new("TextButton", SettingsFrame)
+PotatoBtn.Size = UDim2.new(0, 60, 0, 30)
+PotatoBtn.Position = UDim2.new(1, -65, 0, 5)
+PotatoBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+PotatoBtn.Text = "OFF"
+PotatoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+PotatoBtn.TextSize = 14
+PotatoBtn.Font = Enum.Font.SourceSansBold
+PotatoBtn.BorderSizePixel = 0
+Instance.new("UICorner", PotatoBtn).CornerRadius = UDim.new(0, 6)
 
-LowBtn.MouseButton1Click:Connect(function()
-    lowGraphics = ToggleSettings(LowBtn, lowGraphics)
-    ApplyLowGraphics(lowGraphics)
+PotatoBtn.MouseButton1Click:Connect(function()
+    potatoMode = TogglePotato(PotatoBtn, potatoMode)
+    ApplyPotatoMode(potatoMode)
     PlaySound(SOUNDS.CLICK, 0.15)
 end)
 
--- Info Low Graphics
-local InfoLow = Instance.new("TextLabel", SettingsFrame)
-InfoLow.Size = UDim2.new(1, -10, 0, 40)
-InfoLow.Position = UDim2.new(0, 5, 0, 40)
-InfoLow.BackgroundTransparency = 1
-InfoLow.Text = "🔘 Mengubah warna maps menjadi abu-abu (grayscale)\n🔘 Menghilangkan tekstur & efek (lebih ringan)\n🔘 Pencahayaan TETAP menyala\n🔘 Generator dan Pallet tetap berwarna"
-InfoLow.TextColor3 = Color3.fromRGB(150, 150, 150)
-InfoLow.TextSize = 11
-InfoLow.Font = Enum.Font.SourceSans
-InfoLow.TextXAlignment = Enum.TextXAlignment.Left
-InfoLow.TextYAlignment = Enum.TextYAlignment.Top
+-- Info Potato Mode
+local InfoPotato = Instance.new("TextLabel", SettingsFrame)
+InfoPotato.Size = UDim2.new(1, -10, 0, 50)
+InfoPotato.Position = UDim2.new(0, 5, 0, 40)
+InfoPotato.BackgroundTransparency = 1
+InfoPotato.Text = "🥔 Mode hemat performa untuk HP kentang\n🔘 Menghilangkan warna & tekstur maps\n🔘 Mematikan efek (partikel, api, asap)\n🔘 Pencahayaan TETAP menyala\n🔘 Generator dan Pallet tetap terlihat"
+InfoPotato.TextColor3 = Color3.fromRGB(150, 150, 150)
+InfoPotato.TextSize = 10
+InfoPotato.Font = Enum.Font.SourceSans
+InfoPotato.TextXAlignment = Enum.TextXAlignment.Left
+InfoPotato.TextYAlignment = Enum.TextYAlignment.Top
 
 -- ====== TAB NAVIGATION ======
 local function ShowPage(page, tab)
