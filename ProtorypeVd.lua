@@ -400,11 +400,18 @@ EspFrame.BackgroundTransparency = 1
 local espSurvival = false
 local espKiller = false
 
--- Fungsi toggle
-local function ToggleESP(btn, state, text)
+-- Fungsi toggle dengan warna ON=Hijau, OFF=Merah
+local function ToggleESP(btn, state)
     state = not state
-    btn.Text = text .. (state and " ✅" or " ❌")
-    btn.BackgroundColor3 = state and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(25, 25, 35)
+    if state then
+        btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)  -- Hijau ON
+        btn.Text = "ON"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        btn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah OFF
+        btn.Text = "OFF"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
     return state
 end
 
@@ -442,63 +449,63 @@ local function UpdateESP()
     end
 end
 
--- Tombol ESP Survival
+-- Label "ESP Survival"
+local LabelSurv = Instance.new("TextLabel", EspFrame)
+LabelSurv.Size = UDim2.new(1, -10, 0, 25)
+LabelSurv.Position = UDim2.new(0, 5, 0, 5)
+LabelSurv.BackgroundTransparency = 1
+LabelSurv.Text = "ESP Survival"
+LabelSurv.TextColor3 = Color3.fromRGB(0, 255, 0)
+LabelSurv.TextSize = 14
+LabelSurv.Font = Enum.Font.SourceSansBold
+LabelSurv.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Tombol ON/OFF ESP Survival
 local EspSurvBtn = Instance.new("TextButton", EspFrame)
-EspSurvBtn.Size = UDim2.new(1, -10, 0, 35)
-EspSurvBtn.Position = UDim2.new(0, 5, 0, 5)
-EspSurvBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-EspSurvBtn.Text = "ESP Survival ❌"
+EspSurvBtn.Size = UDim2.new(0, 60, 0, 30)
+EspSurvBtn.Position = UDim2.new(1, -65, 0, 5)
+EspSurvBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah (OFF)
+EspSurvBtn.Text = "OFF"
 EspSurvBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-EspSurvBtn.TextSize = 12
+EspSurvBtn.TextSize = 14
 EspSurvBtn.Font = Enum.Font.SourceSansBold
 EspSurvBtn.BorderSizePixel = 0
 Instance.new("UICorner", EspSurvBtn).CornerRadius = UDim.new(0, 6)
 
-local stroke1 = Instance.new("UIStroke", EspSurvBtn)
-stroke1.Color = Color3.fromRGB(0, 255, 0)
-stroke1.Thickness = 1
-stroke1.Transparency = 0.5
-
 EspSurvBtn.MouseButton1Click:Connect(function()
-    espSurvival = ToggleESP(EspSurvBtn, espSurvival, "ESP Survival")
+    espSurvival = ToggleESP(EspSurvBtn, espSurvival)
     UpdateESP()
     PlaySound(SOUNDS.CLICK, 0.15)
 end)
 
--- Tombol ESP Killer
+-- Label "ESP Killer"
+local LabelKill = Instance.new("TextLabel", EspFrame)
+LabelKill.Size = UDim2.new(1, -10, 0, 25)
+LabelKill.Position = UDim2.new(0, 5, 0, 40)
+LabelKill.BackgroundTransparency = 1
+LabelKill.Text = "ESP Killer"
+LabelKill.TextColor3 = Color3.fromRGB(255, 0, 0)
+LabelKill.TextSize = 14
+LabelKill.Font = Enum.Font.SourceSansBold
+LabelKill.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Tombol ON/OFF ESP Killer
 local EspKillBtn = Instance.new("TextButton", EspFrame)
-EspKillBtn.Size = UDim2.new(1, -10, 0, 35)
-EspKillBtn.Position = UDim2.new(0, 5, 0, 45)
-EspKillBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-EspKillBtn.Text = "ESP Killer ❌"
+EspKillBtn.Size = UDim2.new(0, 60, 0, 30)
+EspKillBtn.Position = UDim2.new(1, -65, 0, 40)
+EspKillBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah (OFF)
+EspKillBtn.Text = "OFF"
 EspKillBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-EspKillBtn.TextSize = 12
+EspKillBtn.TextSize = 14
 EspKillBtn.Font = Enum.Font.SourceSansBold
 EspKillBtn.BorderSizePixel = 0
 Instance.new("UICorner", EspKillBtn).CornerRadius = UDim.new(0, 6)
 
-local stroke2 = Instance.new("UIStroke", EspKillBtn)
-stroke2.Color = Color3.fromRGB(255, 0, 0)
-stroke2.Thickness = 1
-stroke2.Transparency = 0.5
-
 EspKillBtn.MouseButton1Click:Connect(function()
-    espKiller = ToggleESP(EspKillBtn, espKiller, "ESP Killer")
+    espKiller = ToggleESP(EspKillBtn, espKiller)
     UpdateESP()
     PlaySound(SOUNDS.CLICK, 0.15)
 end)
-
--- Info text
-local InfoText = Instance.new("TextLabel", EspFrame)
-InfoText.Size = UDim2.new(1, -10, 0, 40)
-InfoText.Position = UDim2.new(0, 5, 0, 85)
-InfoText.BackgroundTransparency = 1
-InfoText.Text = "🟢 Survival = Hijau\n🔴 Killer = Merah"
-InfoText.TextColor3 = Color3.fromRGB(180, 180, 180)
-InfoText.TextSize = 11
-InfoText.Font = Enum.Font.SourceSans
-InfoText.TextXAlignment = Enum.TextXAlignment.Left
-InfoText.TextYAlignment = Enum.TextYAlignment.Top
 
 -- Update ESP otomatis
 spawn(function()
