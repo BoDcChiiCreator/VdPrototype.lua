@@ -1,141 +1,166 @@
--- ====== AMBIL PLAYER ======
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+-- ====== ANTI REDUNDANT ======
+local CoreGui = game:GetService("CoreGui")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
--- ====== BUAT SCREEN GUI INDUK ======
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "BD_UI"
-screenGui.Parent = playerGui
+if CoreGui:FindFirstChild("BD_UI") then CoreGui.BD_UI:Destroy() end
+if CoreGui:FindFirstChild("BD_Toggle") then CoreGui.BD_Toggle:Destroy() end
 
--- ====== TAB UI (Bundar dengan tulisan BD) ======
-local tabButton = Instance.new("ImageButton")
-tabButton.Size = UDim2.new(0, 60, 0, 60)
-tabButton.Position = UDim2.new(1, -80, 0, 20)
-tabButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-tabButton.BackgroundTransparency = 0.2
-tabButton.Image = ""
-tabButton.BorderSizePixel = 0
-tabButton.Parent = screenGui
+-- ====== SCREEN GUI INDUK ======
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "BD_UI"
+ScreenGui.ResetOnSpawn = false
 
--- Bikin bentuk bundar
-local cornerTab = Instance.new("UICorner")
-cornerTab.CornerRadius = UDim.new(1, 0)
-cornerTab.Parent = tabButton
+-- ====== FUNGSI DRAG ======
+local function EnableDrag(gui)
+    local dragging, dragStart, startPos
+    gui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = gui.Position
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+end
 
--- Teks "BD" di dalam tab
-local tabText = Instance.new("TextLabel")
-tabText.Size = UDim2.new(1, 0, 1, 0)
-tabText.BackgroundTransparency = 1
-tabText.Text = "BD"
-tabText.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabText.TextScaled = true
-tabText.Font = Enum.Font.GothamBold
-tabText.Parent = tabButton
+-- ====== TOMBOL TAB BD (KIRI) ======
+local ToggleGui = Instance.new("ScreenGui", CoreGui)
+ToggleGui.Name = "BD_Toggle"
 
--- ====== MAIN UI (Kotak persegi panjang) ======
-local mainUI = Instance.new("Frame")
-mainUI.Size = UDim2.new(0, 320, 0, 450)
-mainUI.Position = UDim2.new(1, -340, 0, 100)
-mainUI.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-mainUI.BackgroundTransparency = 0.15
-mainUI.BorderSizePixel = 0
-mainUI.Visible = false
-mainUI.Parent = screenGui
+local TabBtn = Instance.new("TextButton", ToggleGui)
+TabBtn.Size = UDim2.new(0, 55, 0, 55)
+TabBtn.Position = UDim2.new(0, 15, 0.5, -27.5)
+TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+TabBtn.Text = "BD"
+TabBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
+TabBtn.TextSize = 22
+TabBtn.Font = Enum.Font.SourceSansBold
+TabBtn.BorderSizePixel = 0
+Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(1, 0)  -- 100% bundar
 
--- Bikin sudut melengkung
-local cornerMain = Instance.new("UICorner")
-cornerMain.CornerRadius = UDim.new(0, 12)
-cornerMain.Parent = mainUI
+-- Stroke berwarna (animasi)
+local TabStroke = Instance.new("UIStroke", TabBtn)
+TabStroke.Color = Color3.fromRGB(255, 105, 180)
+TabStroke.Thickness = 2
+
+-- Animasi warna stroke
+task.spawn(function()
+    while task.wait() do
+        local hue = tick() % 5 / 5
+        TabStroke.Color = Color3.fromHSV(hue, 0.6, 1)
+    end
+end)
+
+EnableDrag(TabBtn)
+
+-- ====== MAIN UI (KOTAK PERSEGI PANJANG) ======
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 0, 0, 0)  -- Mulai kecil
+MainFrame.Position = UDim2.new(1, -370, 0, 80)  -- Pojok kanan atas
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.Visible = false
+MainFrame.Active = true
+MainFrame.ClipsDescendants = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+
+-- Stroke utama (animasi)
+local MainStroke = Instance.new("UIStroke", MainFrame)
+MainStroke.Color = Color3.fromRGB(255, 105, 180)
+MainStroke.Thickness = 2
+
+task.spawn(function()
+    while task.wait() do
+        local hue = tick() % 5 / 5
+        MainStroke.Color = Color3.fromHSV(hue, 0.6, 1)
+    end
+end)
+
+EnableDrag(MainFrame)
+
+-- ====== HEADER / JUDUL ======
+local Header = Instance.new("TextLabel", MainFrame)
+Header.Size = UDim2.new(1, 0, 0, 35)
+Header.Position = UDim2.new(0, 0, 0, 0)
+Header.BackgroundTransparency = 1
+Header.Text = "BD PROJECT"
+Header.TextColor3 = Color3.fromRGB(255, 105, 180)
+Header.TextSize = 16
+Header.Font = Enum.Font.SourceSansBold
+Header.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Garis bawah header
+local HeaderLine = Instance.new("Frame", MainFrame)
+HeaderLine.Size = UDim2.new(0.95, 0, 0, 2)
+HeaderLine.Position = UDim2.new(0.025, 0, 0, 35)
+HeaderLine.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+HeaderLine.BackgroundTransparency = 0.5
+HeaderLine.BorderSizePixel = 0
 
 -- ====== TOMBOL TUTUP (X) ======
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 35, 0, 35)
-closeBtn.Position = UDim2.new(1, -45, 0, 5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-closeBtn.BackgroundTransparency = 0.3
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.TextScaled = true
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.BorderSizePixel = 0
-closeBtn.Parent = mainUI
+local CloseBtn = Instance.new("TextButton", MainFrame)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -38, 0, 3)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseBtn.BackgroundTransparency = 0.3
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 16
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.BorderSizePixel = 0
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1, 0)  -- Bundar
 
--- Bikin tombol X bundar
-local cornerClose = Instance.new("UICorner")
-cornerClose.CornerRadius = UDim.new(1, 0)
-cornerClose.Parent = closeBtn
+-- Hover effect
+CloseBtn.MouseEnter:Connect(function()
+    CloseBtn.BackgroundTransparency = 0.1
+end)
+CloseBtn.MouseLeave:Connect(function()
+    CloseBtn.BackgroundTransparency = 0.3
+end)
 
--- ====== JUDUL ======
-local titleUI = Instance.new("TextLabel")
-titleUI.Size = UDim2.new(1, 0, 0, 40)
-titleUI.Position = UDim2.new(0, 0, 0, 0)
-titleUI.BackgroundTransparency = 1
-titleUI.Text = "VIOLENCE DISTRICT"
-titleUI.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleUI.TextScaled = true
-titleUI.Font = Enum.Font.GothamBold
-titleUI.Parent = mainUI
-
--- Garis bawah judul
-local line = Instance.new("Frame")
-line.Size = UDim2.new(0.9, 0, 0, 2)
-line.Position = UDim2.new(0.05, 0, 0, 40)
-line.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
-line.BackgroundTransparency = 0.5
-line.Parent = mainUI
-
--- ====== PLACEHOLDER ======
-local placeholder = Instance.new("TextLabel")
-placeholder.Size = UDim2.new(1, 0, 1, -50)
-placeholder.Position = UDim2.new(0, 0, 0, 50)
-placeholder.BackgroundTransparency = 1
-placeholder.Text = "⚙️ Fitur akan ditambahkan"
-placeholder.TextColor3 = Color3.fromRGB(150, 150, 150)
-placeholder.TextScaled = true
-placeholder.Font = Enum.Font.Gotham
-placeholder.Parent = mainUI
+-- ====== PLACEHOLDER (KOSONG) ======
+local Placeholder = Instance.new("TextLabel", MainFrame)
+Placeholder.Size = UDim2.new(1, 0, 1, -45)
+Placeholder.Position = UDim2.new(0, 0, 0, 40)
+Placeholder.BackgroundTransparency = 1
+Placeholder.Text = "⚙️ Fitur akan ditambahkan"
+Placeholder.TextColor3 = Color3.fromRGB(150, 150, 150)
+Placeholder.TextSize = 14
+Placeholder.Font = Enum.Font.SourceSans
+Placeholder.TextXAlignment = Enum.TextXAlignment.Center
+Placeholder.TextYAlignment = Enum.TextYAlignment.Center
 
 -- ====== FUNGSI BUKA/TUTUP ======
 local isOpen = false
 
-tabButton.MouseButton1Click:Connect(function()
+TabBtn.MouseButton1Click:Connect(function()
     isOpen = not isOpen
-    mainUI.Visible = isOpen
     if isOpen then
-        tabButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        MainFrame.Visible = true
+        MainFrame:TweenSize(UDim2.new(0, 350, 0, 220), "Out", "Back", 0.4, true)
+        TabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     else
-        tabButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true, function()
+            MainFrame.Visible = false
+        end)
+        TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     end
 end)
 
-closeBtn.MouseButton1Click:Connect(function()
+CloseBtn.MouseButton1Click:Connect(function()
     isOpen = false
-    mainUI.Visible = false
-    tabButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-end)
-
--- ====== DRAGGABLE ======
-local dragging = false
-local dragStart = nil
-local startPos = nil
-
-mainUI.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = mainUI.Position
-    end
-end)
-
-mainUI.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        mainUI.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
+    MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true, function()
+        MainFrame.Visible = false
+    end)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 end)
