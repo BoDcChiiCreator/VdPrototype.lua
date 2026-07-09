@@ -2,7 +2,6 @@
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
 
 if CoreGui:FindFirstChild("BD_UI") then CoreGui.BD_UI:Destroy() end
 if CoreGui:FindFirstChild("BD_Toggle") then CoreGui.BD_Toggle:Destroy() end
@@ -14,7 +13,10 @@ ScreenGui.ResetOnSpawn = false
 
 -- ====== FUNGSI DRAG ======
 local function EnableDrag(gui)
-    local dragging, dragStart, startPos
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    
     gui.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
@@ -22,12 +24,14 @@ local function EnableDrag(gui)
             startPos = gui.Position
         end
     end)
+    
     UIS.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
             gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
+    
     UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
@@ -40,12 +44,12 @@ local ToggleGui = Instance.new("ScreenGui", CoreGui)
 ToggleGui.Name = "BD_Toggle"
 
 local TabBtn = Instance.new("TextButton", ToggleGui)
-TabBtn.Size = UDim2.new(0, 80, 0, 80)  -- Lebih besar
+TabBtn.Size = UDim2.new(0, 80, 0, 80)
 TabBtn.Position = UDim2.new(0, 10, 0.5, -40)
 TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 TabBtn.Text = "BoDcChii\nCreator"
 TabBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
-TabBtn.TextSize = 14
+TabBtn.TextSize = 13
 TabBtn.Font = Enum.Font.SourceSansBold
 TabBtn.BorderSizePixel = 0
 TabBtn.TextWrapped = true
@@ -55,8 +59,8 @@ local TabStroke = Instance.new("UIStroke", TabBtn)
 TabStroke.Color = Color3.fromRGB(255, 105, 180)
 TabStroke.Thickness = 2
 
-task.spawn(function()
-    while task.wait() do
+spawn(function()
+    while wait() do
         local hue = tick() % 5 / 5
         TabStroke.Color = Color3.fromHSV(hue, 0.6, 1)
     end
@@ -64,7 +68,7 @@ end)
 
 EnableDrag(TabBtn)
 
--- ====== MAIN UI (LEBIH PENDEK) ======
+-- ====== MAIN UI ======
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 MainFrame.Position = UDim2.new(1, -420, 0, 80)
@@ -78,8 +82,8 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180)
 MainStroke.Thickness = 2
 
-task.spawn(function()
-    while task.wait() do
+spawn(function()
+    while wait() do
         local hue = tick() % 5 / 5
         MainStroke.Color = Color3.fromHSV(hue, 0.6, 1)
     end
@@ -214,8 +218,7 @@ local Page2 = CreatePage()
 local Page3 = CreatePage()
 local Page4 = CreatePage()
 
--- ====== PAGE 0: ABOUT (KREATIF DENGAN LINK YT) ======
--- Frame utama About
+-- ====== PAGE 0: ABOUT ======
 local AboutFrame = Instance.new("Frame", Page0)
 AboutFrame.Size = UDim2.new(1, 0, 1, 0)
 AboutFrame.BackgroundTransparency = 1
@@ -226,7 +229,6 @@ ProfileFrame.Size = UDim2.new(1, 0, 0, 100)
 ProfileFrame.Position = UDim2.new(0, 0, 0, 0)
 ProfileFrame.BackgroundTransparency = 1
 
--- Avatar Circle (simulasi)
 local AvatarCircle = Instance.new("Frame", ProfileFrame)
 AvatarCircle.Size = UDim2.new(0, 60, 0, 60)
 AvatarCircle.Position = UDim2.new(0, 10, 0, 10)
@@ -242,7 +244,6 @@ AvatarText.TextColor3 = Color3.fromRGB(255, 255, 255)
 AvatarText.TextSize = 24
 AvatarText.Font = Enum.Font.SourceSansBold
 
--- Nama Creator
 local CreatorName = Instance.new("TextLabel", ProfileFrame)
 CreatorName.Size = UDim2.new(1, -80, 0, 25)
 CreatorName.Position = UDim2.new(0, 80, 0, 10)
@@ -273,7 +274,6 @@ CreatorSub2.TextSize = 11
 CreatorSub2.Font = Enum.Font.SourceSans
 CreatorSub2.TextXAlignment = Enum.TextXAlignment.Left
 
--- Garis pemisah
 local Line1 = Instance.new("Frame", AboutFrame)
 Line1.Size = UDim2.new(0.95, 0, 0, 1)
 Line1.Position = UDim2.new(0.025, 0, 0, 105)
@@ -317,7 +317,6 @@ ChannelLink2.TextSize = 10
 ChannelLink2.Font = Enum.Font.SourceSans
 ChannelLink2.TextXAlignment = Enum.TextXAlignment.Left
 
--- Garis pemisah
 local Line2 = Instance.new("Frame", AboutFrame)
 Line2.Size = UDim2.new(0.95, 0, 0, 1)
 Line2.Position = UDim2.new(0.025, 0, 0, 185)
@@ -325,9 +324,9 @@ Line2.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 Line2.BackgroundTransparency = 0.5
 Line2.BorderSizePixel = 0
 
--- Info Script
+-- Info Script (DIKOSONGKAN - masih prototype)
 local ScriptFrame = Instance.new("Frame", AboutFrame)
-ScriptFrame.Size = UDim2.new(1, 0, 0, 80)
+ScriptFrame.Size = UDim2.new(1, 0, 0, 60)
 ScriptFrame.Position = UDim2.new(0, 0, 0, 190)
 ScriptFrame.BackgroundTransparency = 1
 
@@ -342,11 +341,11 @@ ScriptLabel.Font = Enum.Font.SourceSansBold
 ScriptLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local ScriptInfo = Instance.new("TextLabel", ScriptFrame)
-ScriptInfo.Size = UDim2.new(1, -20, 0, 50)
+ScriptInfo.Size = UDim2.new(1, -20, 0, 30)
 ScriptInfo.Position = UDim2.new(0, 10, 0, 22)
 ScriptInfo.BackgroundTransparency = 1
-ScriptInfo.Text = "Version: v0.4.2\nStatus: BETA\nFeatures: Auto Parry, ESP, No Skill Check, Full Bright, No Fog, Potato Mode"
-ScriptInfo.TextColor3 = Color3.fromRGB(180, 180, 180)
+ScriptInfo.Text = "📌 Script masih dalam tahap prototype.\nFitur akan segera hadir!"
+ScriptInfo.TextColor3 = Color3.fromRGB(150, 150, 150)
 ScriptInfo.TextSize = 10
 ScriptInfo.Font = Enum.Font.SourceSans
 ScriptInfo.TextXAlignment = Enum.TextXAlignment.Left
@@ -411,7 +410,7 @@ TabBtn.MouseButton1Click:Connect(function()
     isOpen = not isOpen
     if isOpen then
         MainFrame.Visible = true
-        MainFrame:TweenSize(UDim2.new(0, 400, 0, 280), "Out", "Back", 0.4, true)  -- Lebih pendek
+        MainFrame:TweenSize(UDim2.new(0, 400, 0, 280), "Out", "Back", 0.4, true)
         TabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     else
         MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true, function()
