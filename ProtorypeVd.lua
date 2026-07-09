@@ -2,6 +2,7 @@
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
 
 if CoreGui:FindFirstChild("BD_UI") then CoreGui.BD_UI:Destroy() end
 if CoreGui:FindFirstChild("BD_Toggle") then CoreGui.BD_Toggle:Destroy() end
@@ -34,19 +35,20 @@ local function EnableDrag(gui)
     end)
 end
 
--- ====== TOMBOL TAB BD (KIRI) ======
+-- ====== TOMBOL TAB "BoDcChii Creator" (KIRI) ======
 local ToggleGui = Instance.new("ScreenGui", CoreGui)
 ToggleGui.Name = "BD_Toggle"
 
 local TabBtn = Instance.new("TextButton", ToggleGui)
-TabBtn.Size = UDim2.new(0, 55, 0, 55)
-TabBtn.Position = UDim2.new(0, 15, 0.5, -27.5)
+TabBtn.Size = UDim2.new(0, 80, 0, 80)  -- Lebih besar
+TabBtn.Position = UDim2.new(0, 10, 0.5, -40)
 TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-TabBtn.Text = "BD"
+TabBtn.Text = "BoDcChii\nCreator"
 TabBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
-TabBtn.TextSize = 22
+TabBtn.TextSize = 14
 TabBtn.Font = Enum.Font.SourceSansBold
 TabBtn.BorderSizePixel = 0
+TabBtn.TextWrapped = true
 Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(1, 0)
 
 local TabStroke = Instance.new("UIStroke", TabBtn)
@@ -62,7 +64,7 @@ end)
 
 EnableDrag(TabBtn)
 
--- ====== MAIN UI ======
+-- ====== MAIN UI (LEBIH PENDEK) ======
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 MainFrame.Position = UDim2.new(1, -420, 0, 80)
@@ -90,7 +92,7 @@ local Header = Instance.new("TextLabel", MainFrame)
 Header.Size = UDim2.new(1, 0, 0, 35)
 Header.Position = UDim2.new(0, 0, 0, 0)
 Header.BackgroundTransparency = 1
-Header.Text = "BD PROJECT"
+Header.Text = "BoDcChii PROJECT"
 Header.TextColor3 = Color3.fromRGB(255, 105, 180)
 Header.TextSize = 16
 Header.Font = Enum.Font.SourceSansBold
@@ -124,14 +126,12 @@ CloseBtn.MouseLeave:Connect(function()
 end)
 
 -- ====== LAYOUT SPLIT ======
--- Bagian Kiri (Sidebar) - 30% lebar
 local Sidebar = Instance.new("Frame", MainFrame)
 Sidebar.Size = UDim2.new(0, 120, 1, -45)
 Sidebar.Position = UDim2.new(0, 5, 0, 42)
 Sidebar.BackgroundTransparency = 1
 Sidebar.BorderSizePixel = 0
 
--- Garis pemisah vertikal
 local Divider = Instance.new("Frame", MainFrame)
 Divider.Size = UDim2.new(0, 2, 1, -55)
 Divider.Position = UDim2.new(0, 128, 0, 45)
@@ -139,14 +139,13 @@ Divider.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 Divider.BackgroundTransparency = 0.3
 Divider.BorderSizePixel = 0
 
--- Bagian Kanan (Content) - 70% lebar
 local Content = Instance.new("Frame", MainFrame)
 Content.Size = UDim2.new(1, -140, 1, -55)
 Content.Position = UDim2.new(0, 135, 0, 45)
 Content.BackgroundTransparency = 1
 Content.BorderSizePixel = 0
 
--- ====== SCROLLING SIDEBAR (KIRI) ======
+-- ====== SCROLLING SIDEBAR ======
 local SidebarScroll = Instance.new("ScrollingFrame", Sidebar)
 SidebarScroll.Size = UDim2.new(1, 0, 1, 0)
 SidebarScroll.Position = UDim2.new(0, 0, 0, 0)
@@ -155,12 +154,12 @@ SidebarScroll.BorderSizePixel = 0
 SidebarScroll.Active = true
 SidebarScroll.ScrollBarThickness = 4
 SidebarScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-SidebarScroll.CanvasSize = UDim2.new(0, 0, 3, 0)  -- Tinggi bisa di-scroll
+SidebarScroll.CanvasSize = UDim2.new(0, 0, 2.5, 0)
 
 local SidebarLayout = Instance.new("UIListLayout", SidebarScroll)
 SidebarLayout.Padding = UDim.new(0, 5)
 
--- ====== SCROLLING CONTENT (KANAN) ======
+-- ====== SCROLLING CONTENT ======
 local ContentScroll = Instance.new("ScrollingFrame", Content)
 ContentScroll.Size = UDim2.new(1, 0, 1, 0)
 ContentScroll.Position = UDim2.new(0, 0, 0, 0)
@@ -169,7 +168,7 @@ ContentScroll.BorderSizePixel = 0
 ContentScroll.Active = true
 ContentScroll.ScrollBarThickness = 4
 ContentScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-ContentScroll.CanvasSize = UDim2.new(0, 0, 2, 0)
+ContentScroll.CanvasSize = UDim2.new(0, 0, 1.5, 0)
 
 local ContentLayout = Instance.new("UIListLayout", ContentScroll)
 ContentLayout.Padding = UDim.new(0, 5)
@@ -194,7 +193,6 @@ local function CreateSidebarItem(text)
     return btn
 end
 
--- Buat tab "0. About" dan lainnya (placeholder)
 local AboutTab = CreateSidebarItem("0. About")
 local Tab1 = CreateSidebarItem("1. Player ESP")
 local Tab2 = CreateSidebarItem("2. Survival")
@@ -207,29 +205,152 @@ local function CreatePage()
     frame.Size = UDim2.new(1, -10, 1, 0)
     frame.BackgroundTransparency = 1
     frame.Visible = false
-    
-    local layout = Instance.new("UIListLayout", frame)
-    layout.Padding = UDim.new(0, 5)
-    
     return frame
 end
 
-local Page0 = CreatePage() -- About
-local Page1 = CreatePage() -- Player ESP
-local Page2 = CreatePage() -- Survival
-local Page3 = CreatePage() -- Smooth Maps
-local Page4 = CreatePage() -- Settings
+local Page0 = CreatePage()
+local Page1 = CreatePage()
+local Page2 = CreatePage()
+local Page3 = CreatePage()
+local Page4 = CreatePage()
 
--- ====== ISI PAGE 0 (ABOUT) ======
-local AboutText = Instance.new("TextLabel", Page0)
-AboutText.Size = UDim2.new(1, 0, 0, 180)
-AboutText.BackgroundTransparency = 1
-AboutText.Text = "📋 ABOUT\n\nCreator: BD Project\nVersion: v0.1\n\nFitur:\n- Auto Parry (Beta)\n- ESP Player\n- No Skill Check\n- Full Bright\n- No Fog\n- Potato Mode"
-AboutText.TextColor3 = Color3.fromRGB(200, 200, 200)
-AboutText.TextSize = 11
-AboutText.Font = Enum.Font.SourceSansBold
-AboutText.TextXAlignment = Enum.TextXAlignment.Left
-AboutText.TextYAlignment = Enum.TextYAlignment.Top
+-- ====== PAGE 0: ABOUT (KREATIF DENGAN LINK YT) ======
+-- Frame utama About
+local AboutFrame = Instance.new("Frame", Page0)
+AboutFrame.Size = UDim2.new(1, 0, 1, 0)
+AboutFrame.BackgroundTransparency = 1
+
+-- Profile Section
+local ProfileFrame = Instance.new("Frame", AboutFrame)
+ProfileFrame.Size = UDim2.new(1, 0, 0, 100)
+ProfileFrame.Position = UDim2.new(0, 0, 0, 0)
+ProfileFrame.BackgroundTransparency = 1
+
+-- Avatar Circle (simulasi)
+local AvatarCircle = Instance.new("Frame", ProfileFrame)
+AvatarCircle.Size = UDim2.new(0, 60, 0, 60)
+AvatarCircle.Position = UDim2.new(0, 10, 0, 10)
+AvatarCircle.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+AvatarCircle.BackgroundTransparency = 0.3
+Instance.new("UICorner", AvatarCircle).CornerRadius = UDim.new(1, 0)
+
+local AvatarText = Instance.new("TextLabel", AvatarCircle)
+AvatarText.Size = UDim2.new(1, 0, 1, 0)
+AvatarText.BackgroundTransparency = 1
+AvatarText.Text = "BD"
+AvatarText.TextColor3 = Color3.fromRGB(255, 255, 255)
+AvatarText.TextSize = 24
+AvatarText.Font = Enum.Font.SourceSansBold
+
+-- Nama Creator
+local CreatorName = Instance.new("TextLabel", ProfileFrame)
+CreatorName.Size = UDim2.new(1, -80, 0, 25)
+CreatorName.Position = UDim2.new(0, 80, 0, 10)
+CreatorName.BackgroundTransparency = 1
+CreatorName.Text = "BoDcChii"
+CreatorName.TextColor3 = Color3.fromRGB(255, 105, 180)
+CreatorName.TextSize = 18
+CreatorName.Font = Enum.Font.SourceSansBold
+CreatorName.TextXAlignment = Enum.TextXAlignment.Left
+
+local CreatorSub = Instance.new("TextLabel", ProfileFrame)
+CreatorSub.Size = UDim2.new(1, -80, 0, 20)
+CreatorSub.Position = UDim2.new(0, 80, 0, 35)
+CreatorSub.BackgroundTransparency = 1
+CreatorSub.Text = "Creator & Developer"
+CreatorSub.TextColor3 = Color3.fromRGB(180, 180, 180)
+CreatorSub.TextSize = 12
+CreatorSub.Font = Enum.Font.SourceSans
+CreatorSub.TextXAlignment = Enum.TextXAlignment.Left
+
+local CreatorSub2 = Instance.new("TextLabel", ProfileFrame)
+CreatorSub2.Size = UDim2.new(1, -80, 0, 20)
+CreatorSub2.Position = UDim2.new(0, 80, 0, 55)
+CreatorSub2.BackgroundTransparency = 1
+CreatorSub2.Text = "🎮 Roblox Scripter"
+CreatorSub2.TextColor3 = Color3.fromRGB(150, 150, 150)
+CreatorSub2.TextSize = 11
+CreatorSub2.Font = Enum.Font.SourceSans
+CreatorSub2.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Garis pemisah
+local Line1 = Instance.new("Frame", AboutFrame)
+Line1.Size = UDim2.new(0.95, 0, 0, 1)
+Line1.Position = UDim2.new(0.025, 0, 0, 105)
+Line1.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+Line1.BackgroundTransparency = 0.5
+Line1.BorderSizePixel = 0
+
+-- Info Channel
+local ChannelFrame = Instance.new("Frame", AboutFrame)
+ChannelFrame.Size = UDim2.new(1, 0, 0, 70)
+ChannelFrame.Position = UDim2.new(0, 0, 0, 110)
+ChannelFrame.BackgroundTransparency = 1
+
+local ChannelLabel = Instance.new("TextLabel", ChannelFrame)
+ChannelLabel.Size = UDim2.new(1, -20, 0, 20)
+ChannelLabel.Position = UDim2.new(0, 10, 0, 0)
+ChannelLabel.BackgroundTransparency = 1
+ChannelLabel.Text = "📺 YouTube Channel"
+ChannelLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ChannelLabel.TextSize = 13
+ChannelLabel.Font = Enum.Font.SourceSansBold
+ChannelLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local ChannelLink = Instance.new("TextLabel", ChannelFrame)
+ChannelLink.Size = UDim2.new(1, -20, 0, 20)
+ChannelLink.Position = UDim2.new(0, 10, 0, 22)
+ChannelLink.BackgroundTransparency = 1
+ChannelLink.Text = "@BoDcChii"
+ChannelLink.TextColor3 = Color3.fromRGB(255, 200, 100)
+ChannelLink.TextSize = 12
+ChannelLink.Font = Enum.Font.SourceSans
+ChannelLink.TextXAlignment = Enum.TextXAlignment.Left
+
+local ChannelLink2 = Instance.new("TextLabel", ChannelFrame)
+ChannelLink2.Size = UDim2.new(1, -20, 0, 20)
+ChannelLink2.Position = UDim2.new(0, 10, 0, 42)
+ChannelLink2.BackgroundTransparency = 1
+ChannelLink2.Text = "🔗 https://youtube.com/@bodcchii"
+ChannelLink2.TextColor3 = Color3.fromRGB(100, 150, 255)
+ChannelLink2.TextSize = 10
+ChannelLink2.Font = Enum.Font.SourceSans
+ChannelLink2.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Garis pemisah
+local Line2 = Instance.new("Frame", AboutFrame)
+Line2.Size = UDim2.new(0.95, 0, 0, 1)
+Line2.Position = UDim2.new(0.025, 0, 0, 185)
+Line2.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+Line2.BackgroundTransparency = 0.5
+Line2.BorderSizePixel = 0
+
+-- Info Script
+local ScriptFrame = Instance.new("Frame", AboutFrame)
+ScriptFrame.Size = UDim2.new(1, 0, 0, 80)
+ScriptFrame.Position = UDim2.new(0, 0, 0, 190)
+ScriptFrame.BackgroundTransparency = 1
+
+local ScriptLabel = Instance.new("TextLabel", ScriptFrame)
+ScriptLabel.Size = UDim2.new(1, -20, 0, 20)
+ScriptLabel.Position = UDim2.new(0, 10, 0, 0)
+ScriptLabel.BackgroundTransparency = 1
+ScriptLabel.Text = "⚡ Script Info"
+ScriptLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ScriptLabel.TextSize = 13
+ScriptLabel.Font = Enum.Font.SourceSansBold
+ScriptLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local ScriptInfo = Instance.new("TextLabel", ScriptFrame)
+ScriptInfo.Size = UDim2.new(1, -20, 0, 50)
+ScriptInfo.Position = UDim2.new(0, 10, 0, 22)
+ScriptInfo.BackgroundTransparency = 1
+ScriptInfo.Text = "Version: v0.4.2\nStatus: BETA\nFeatures: Auto Parry, ESP, No Skill Check, Full Bright, No Fog, Potato Mode"
+ScriptInfo.TextColor3 = Color3.fromRGB(180, 180, 180)
+ScriptInfo.TextSize = 10
+ScriptInfo.Font = Enum.Font.SourceSans
+ScriptInfo.TextXAlignment = Enum.TextXAlignment.Left
+ScriptInfo.TextYAlignment = Enum.TextYAlignment.Top
 
 -- ====== PLACEHOLDER UNTUK PAGE LAIN ======
 local function CreatePlaceholder(page, text)
@@ -251,18 +372,13 @@ CreatePlaceholder(Page3, "⚙️ Smooth Maps Features\nComing Soon...")
 CreatePlaceholder(Page4, "⚙️ Settings\nComing Soon...")
 
 -- ====== TAB NAVIGATION ======
-local currentPage = Page0
-local currentTab = AboutTab
-
 local function ShowPage(page, tab)
-    -- Sembunyikan semua page
     Page0.Visible = false
     Page1.Visible = false
     Page2.Visible = false
     Page3.Visible = false
     Page4.Visible = false
     
-    -- Reset semua tab
     for _, child in ipairs(SidebarScroll:GetChildren()) do
         if child:IsA("TextButton") then
             child.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
@@ -272,26 +388,20 @@ local function ShowPage(page, tab)
         end
     end
     
-    -- Tampilkan page yang dipilih
     page.Visible = true
     tab.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
     tab.BackgroundTransparency = 0.3
     if tab.UIStroke then
         tab.UIStroke.Transparency = 0
     end
-    
-    currentPage = page
-    currentTab = tab
 end
 
--- Koneksi klik tab
 AboutTab.MouseButton1Click:Connect(function() ShowPage(Page0, AboutTab) end)
 Tab1.MouseButton1Click:Connect(function() ShowPage(Page1, Tab1) end)
 Tab2.MouseButton1Click:Connect(function() ShowPage(Page2, Tab2) end)
 Tab3.MouseButton1Click:Connect(function() ShowPage(Page3, Tab3) end)
 Tab4.MouseButton1Click:Connect(function() ShowPage(Page4, Tab4) end)
 
--- Tampilkan default
 ShowPage(Page0, AboutTab)
 
 -- ====== FUNGSI BUKA/TUTUP ======
@@ -301,7 +411,7 @@ TabBtn.MouseButton1Click:Connect(function()
     isOpen = not isOpen
     if isOpen then
         MainFrame.Visible = true
-        MainFrame:TweenSize(UDim2.new(0, 400, 0, 300), "Out", "Back", 0.4, true)
+        MainFrame:TweenSize(UDim2.new(0, 400, 0, 280), "Out", "Back", 0.4, true)  -- Lebih pendek
         TabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     else
         MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true, function()
