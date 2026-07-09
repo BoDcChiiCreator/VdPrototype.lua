@@ -241,7 +241,7 @@ end
 local AboutTab = CreateSidebarItem("0. About")
 local Tab1 = CreateSidebarItem("1. Player ESP")
 local Tab2 = CreateSidebarItem("2. Survival")
-local Tab4 = CreateSidebarItem("3. Settings")  -- Settings jadi Tab 3
+local Tab4 = CreateSidebarItem("3. Settings")
 
 -- ====== CONTENT PAGES ======
 local function CreatePage()
@@ -255,7 +255,7 @@ end
 local Page0 = CreatePage()
 local Page1 = CreatePage()
 local Page2 = CreatePage()
-local Page4 = CreatePage()  -- Settings
+local Page4 = CreatePage()
 
 -- ====== PAGE 0: ABOUT ======
 local AboutFrame = Instance.new("Frame", Page0)
@@ -403,11 +403,11 @@ local espKiller = false
 local function ToggleESP(btn, state)
     state = not state
     if state then
-        btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)  -- Hijau ON
+        btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
         btn.Text = "ON"
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     else
-        btn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah OFF
+        btn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
         btn.Text = "OFF"
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
@@ -463,7 +463,7 @@ LabelSurv.TextXAlignment = Enum.TextXAlignment.Left
 local EspSurvBtn = Instance.new("TextButton", EspFrame)
 EspSurvBtn.Size = UDim2.new(0, 60, 0, 30)
 EspSurvBtn.Position = UDim2.new(1, -65, 0, 5)
-EspSurvBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah (OFF)
+EspSurvBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 EspSurvBtn.Text = "OFF"
 EspSurvBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 EspSurvBtn.TextSize = 14
@@ -492,7 +492,7 @@ LabelKill.TextXAlignment = Enum.TextXAlignment.Left
 local EspKillBtn = Instance.new("TextButton", EspFrame)
 EspKillBtn.Size = UDim2.new(0, 60, 0, 30)
 EspKillBtn.Position = UDim2.new(1, -65, 0, 40)
-EspKillBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah (OFF)
+EspKillBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 EspKillBtn.Text = "OFF"
 EspKillBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 EspKillBtn.TextSize = 14
@@ -545,113 +545,99 @@ SettingsFrame.BackgroundTransparency = 1
 
 -- Variabel Low Graphics
 local lowGraphics = false
-local lowGraphicsParts = {}
+local savedParts = {}
 
 -- Fungsi toggle dengan warna ON=Hijau, OFF=Merah
 local function ToggleSettings(btn, state)
     state = not state
     if state then
-        btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)  -- Hijau ON
+        btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
         btn.Text = "ON"
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     else
-        btn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah OFF
+        btn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
         btn.Text = "OFF"
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
     return state
 end
 
--- Fungsi Low Graphics
+-- Fungsi Low Graphics (Hapus Detail Maps, bukan ubah warna)
 local function ApplyLowGraphics(state)
     if state then
-        -- Cari semua part di workspace
-        for _, part in pairs(Workspace:GetDescendants()) do
-            if part:IsA("BasePart") and not part:IsA("Terrain") then
-                -- Cek apakah part adalah Generator atau Pallet
-                local isGenerator = part.Name:lower():find("generator") or part.Name:lower():find("gen") or part:FindFirstAncestor("Generator")
-                local isPallet = part.Name:lower():find("pallet") or part:FindFirstAncestor("Pallet")
-                local isPlayer = part:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(part:FindFirstAncestorOfClass("Model"))
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            -- Cek apakah objek adalah Generator atau Pallet
+            local isGenerator = obj.Name:lower():find("generator") or obj.Name:lower():find("gen") or obj:FindFirstAncestor("Generator")
+            local isPallet = obj.Name:lower():find("pallet") or obj:FindFirstAncestor("Pallet")
+            local isPlayer = obj:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(obj:FindFirstAncestorOfClass("Model"))
+            
+            -- Lewati Generator, Pallet, dan Player
+            if isGenerator or isPallet or isPlayer then
+                continue
+            end
+            
+            -- Hapus detail part (BasePart)
+            if obj:IsA("BasePart") and not obj:IsA("Terrain") then
+                if not savedParts[obj] then
+                    savedParts[obj] = {
+                        Material = obj.Material,
+                        Color = obj.Color,
+                        Transparency = obj.Transparency,
+                        Reflectance = obj.Reflectance
+                    }
+                end
+                -- Jadikan transparan/hampir tidak terlihat
+                obj.Material = Enum.Material.ForceField
+                obj.Transparency = 0.9
+                obj.Reflectance = 0
                 
-                -- Jika bukan Generator, Pallet, atau Player
-                if not isGenerator and not isPallet and not isPlayer then
-                    -- Simpan material asli
-                    if not lowGraphicsParts[part] then
-                        lowGraphicsParts[part] = {
-                            Material = part.Material,
-                            Color = part.Color,
-                            Transparency = part.Transparency,
-                            Reflectance = part.Reflectance
-                        }
-                    end
-                    -- Ubah ke abu-abu tanpa efek
-                    part.Material = Enum.Material.SmoothPlastic
-                    part.Color = Color3.fromRGB(100, 100, 100)
-                    part.Transparency = 0
-                    part.Reflectance = 0
+            -- Hapus Texture/Decal
+            elseif obj:IsA("Texture") or obj:IsA("Decal") then
+                if not savedParts[obj] then
+                    savedParts[obj] = {
+                        Transparency = obj.Transparency
+                    }
                 end
-            elseif part:IsA("Texture") or part:IsA("Decal") then
-                local parent = part.Parent
-                if parent then
-                    local isGenerator = parent.Name:lower():find("generator") or parent.Name:lower():find("gen") or parent:FindFirstAncestor("Generator")
-                    local isPallet = parent.Name:lower():find("pallet") or parent:FindFirstAncestor("Pallet")
-                    local isPlayer = parent:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(parent:FindFirstAncestorOfClass("Model"))
-                    
-                    if not isGenerator and not isPallet and not isPlayer then
-                        part.Transparency = 1
-                    end
+                obj.Transparency = 1
+                
+            -- Matikan efek
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                if not savedParts[obj] then
+                    savedParts[obj] = {
+                        Enabled = obj.Enabled
+                    }
                 end
-            elseif part:IsA("ParticleEmitter") or part:IsA("Trail") or part:IsA("Smoke") or part:IsA("Fire") then
-                local parent = part.Parent
-                if parent then
-                    local isGenerator = parent.Name:lower():find("generator") or parent.Name:lower():find("gen") or parent:FindFirstAncestor("Generator")
-                    local isPallet = parent.Name:lower():find("pallet") or parent:FindFirstAncestor("Pallet")
-                    local isPlayer = parent:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(parent:FindFirstAncestorOfClass("Model"))
-                    
-                    if not isGenerator and not isPallet and not isPlayer then
-                        part.Enabled = false
-                    end
+                obj.Enabled = false
+                
+            -- Hapus efek cahaya
+            elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+                if not savedParts[obj] then
+                    savedParts[obj] = {
+                        Enabled = obj.Enabled
+                    }
                 end
+                obj.Enabled = false
             end
         end
     else
-        -- Kembalikan semua part ke semula
-        for part, data in pairs(lowGraphicsParts) do
-            if part and part.Parent then
-                part.Material = data.Material
-                part.Color = data.Color
-                part.Transparency = data.Transparency
-                part.Reflectance = data.Reflectance
-            end
-        end
-        lowGraphicsParts = {}
-        
-        -- Kembalikan Textures/Decals
-        for _, part in pairs(Workspace:GetDescendants()) do
-            if part:IsA("Texture") or part:IsA("Decal") then
-                local parent = part.Parent
-                if parent then
-                    local isGenerator = parent.Name:lower():find("generator") or parent.Name:lower():find("gen") or parent:FindFirstAncestor("Generator")
-                    local isPallet = parent.Name:lower():find("pallet") or parent:FindFirstAncestor("Pallet")
-                    local isPlayer = parent:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(parent:FindFirstAncestorOfClass("Model"))
-                    
-                    if not isGenerator and not isPallet and not isPlayer then
-                        part.Transparency = 0
-                    end
-                end
-            elseif part:IsA("ParticleEmitter") or part:IsA("Trail") or part:IsA("Smoke") or part:IsA("Fire") then
-                local parent = part.Parent
-                if parent then
-                    local isGenerator = parent.Name:lower():find("generator") or parent.Name:lower():find("gen") or parent:FindFirstAncestor("Generator")
-                    local isPallet = parent.Name:lower():find("pallet") or parent:FindFirstAncestor("Pallet")
-                    local isPlayer = parent:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(parent:FindFirstAncestorOfClass("Model"))
-                    
-                    if not isGenerator and not isPallet and not isPlayer then
-                        part.Enabled = true
-                    end
+        -- Kembalikan semua yang sudah disimpan
+        for obj, data in pairs(savedParts) do
+            if obj and obj.Parent then
+                if obj:IsA("BasePart") then
+                    obj.Material = data.Material
+                    obj.Color = data.Color
+                    obj.Transparency = data.Transparency
+                    obj.Reflectance = data.Reflectance
+                elseif obj:IsA("Texture") or obj:IsA("Decal") then
+                    obj.Transparency = data.Transparency
+                elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                    obj.Enabled = data.Enabled
+                elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+                    obj.Enabled = data.Enabled
                 end
             end
         end
+        savedParts = {}
     end
 end
 
@@ -670,7 +656,7 @@ LabelLow.TextXAlignment = Enum.TextXAlignment.Left
 local LowBtn = Instance.new("TextButton", SettingsFrame)
 LowBtn.Size = UDim2.new(0, 60, 0, 30)
 LowBtn.Position = UDim2.new(1, -65, 0, 5)
-LowBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah (OFF)
+LowBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 LowBtn.Text = "OFF"
 LowBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 LowBtn.TextSize = 14
@@ -689,7 +675,7 @@ local InfoLow = Instance.new("TextLabel", SettingsFrame)
 InfoLow.Size = UDim2.new(1, -10, 0, 40)
 InfoLow.Position = UDim2.new(0, 5, 0, 40)
 InfoLow.BackgroundTransparency = 1
-InfoLow.Text = "🔘 Menghilangkan warna dan efek pada maps\n🔘 Hanya menyisakan Generator dan Pallet"
+InfoLow.Text = "🔘 Menghilangkan detail maps (warna, tekstur, efek)\n🔘 Generator dan Pallet tetap terlihat"
 InfoLow.TextColor3 = Color3.fromRGB(150, 150, 150)
 InfoLow.TextSize = 11
 InfoLow.Font = Enum.Font.SourceSans
@@ -719,7 +705,6 @@ local function ShowPage(page, tab)
         tab.UIStroke.Transparency = 0
     end
     
-    -- Suara pop saat pindah tab
     PlaySound(SOUNDS.POP, 0.15)
 end
 
