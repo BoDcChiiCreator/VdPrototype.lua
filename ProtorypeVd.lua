@@ -4,6 +4,7 @@ local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
 if CoreGui:FindFirstChild("BD_UI") then CoreGui.BD_UI:Destroy() end
 if CoreGui:FindFirstChild("BD_Toggle") then CoreGui.BD_Toggle:Destroy() end
@@ -240,8 +241,7 @@ end
 local AboutTab = CreateSidebarItem("0. About")
 local Tab1 = CreateSidebarItem("1. Player ESP")
 local Tab2 = CreateSidebarItem("2. Survival")
-local Tab3 = CreateSidebarItem("3. Smooth Maps")
-local Tab4 = CreateSidebarItem("4. Settings")
+local Tab4 = CreateSidebarItem("3. Settings")  -- Settings jadi Tab 3
 
 -- ====== CONTENT PAGES ======
 local function CreatePage()
@@ -255,8 +255,7 @@ end
 local Page0 = CreatePage()
 local Page1 = CreatePage()
 local Page2 = CreatePage()
-local Page3 = CreatePage()
-local Page4 = CreatePage()
+local Page4 = CreatePage()  -- Settings
 
 -- ====== PAGE 0: ABOUT ======
 local AboutFrame = Instance.new("Frame", Page0)
@@ -524,30 +523,184 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
--- ====== PLACEHOLDER UNTUK PAGE LAIN ======
-local function CreatePlaceholder(page, text)
-    local label = Instance.new("TextLabel", page)
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(150, 150, 150)
-    label.TextSize = 14
-    label.Font = Enum.Font.SourceSans
-    label.TextXAlignment = Enum.TextXAlignment.Center
-    label.TextYAlignment = Enum.TextYAlignment.Center
-    return label
+-- ====== PAGE 2: SURVIVAL (Placeholder) ======
+local SurvFrame = Instance.new("Frame", Page2)
+SurvFrame.Size = UDim2.new(1, 0, 1, 0)
+SurvFrame.BackgroundTransparency = 1
+
+local SurvPlaceholder = Instance.new("TextLabel", SurvFrame)
+SurvPlaceholder.Size = UDim2.new(1, 0, 1, 0)
+SurvPlaceholder.BackgroundTransparency = 1
+SurvPlaceholder.Text = "⚙️ Survival Features\nComing Soon..."
+SurvPlaceholder.TextColor3 = Color3.fromRGB(150, 150, 150)
+SurvPlaceholder.TextSize = 14
+SurvPlaceholder.Font = Enum.Font.SourceSans
+SurvPlaceholder.TextXAlignment = Enum.TextXAlignment.Center
+SurvPlaceholder.TextYAlignment = Enum.TextYAlignment.Center
+
+-- ====== PAGE 4: SETTINGS (Low Graphics Mode) ======
+local SettingsFrame = Instance.new("Frame", Page4)
+SettingsFrame.Size = UDim2.new(1, 0, 1, 0)
+SettingsFrame.BackgroundTransparency = 1
+
+-- Variabel Low Graphics
+local lowGraphics = false
+local lowGraphicsParts = {}
+
+-- Fungsi toggle dengan warna ON=Hijau, OFF=Merah
+local function ToggleSettings(btn, state)
+    state = not state
+    if state then
+        btn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)  -- Hijau ON
+        btn.Text = "ON"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        btn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah OFF
+        btn.Text = "OFF"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+    return state
 end
 
-CreatePlaceholder(Page2, "⚙️ Survival Features\nComing Soon...")
-CreatePlaceholder(Page3, "⚙️ Smooth Maps Features\nComing Soon...")
-CreatePlaceholder(Page4, "⚙️ Settings\nComing Soon...")
+-- Fungsi Low Graphics
+local function ApplyLowGraphics(state)
+    if state then
+        -- Cari semua part di workspace
+        for _, part in pairs(Workspace:GetDescendants()) do
+            if part:IsA("BasePart") and not part:IsA("Terrain") then
+                -- Cek apakah part adalah Generator atau Pallet
+                local isGenerator = part.Name:lower():find("generator") or part.Name:lower():find("gen") or part:FindFirstAncestor("Generator")
+                local isPallet = part.Name:lower():find("pallet") or part:FindFirstAncestor("Pallet")
+                local isPlayer = part:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(part:FindFirstAncestorOfClass("Model"))
+                
+                -- Jika bukan Generator, Pallet, atau Player
+                if not isGenerator and not isPallet and not isPlayer then
+                    -- Simpan material asli
+                    if not lowGraphicsParts[part] then
+                        lowGraphicsParts[part] = {
+                            Material = part.Material,
+                            Color = part.Color,
+                            Transparency = part.Transparency,
+                            Reflectance = part.Reflectance
+                        }
+                    end
+                    -- Ubah ke abu-abu tanpa efek
+                    part.Material = Enum.Material.SmoothPlastic
+                    part.Color = Color3.fromRGB(100, 100, 100)
+                    part.Transparency = 0
+                    part.Reflectance = 0
+                end
+            elseif part:IsA("Texture") or part:IsA("Decal") then
+                local parent = part.Parent
+                if parent then
+                    local isGenerator = parent.Name:lower():find("generator") or parent.Name:lower():find("gen") or parent:FindFirstAncestor("Generator")
+                    local isPallet = parent.Name:lower():find("pallet") or parent:FindFirstAncestor("Pallet")
+                    local isPlayer = parent:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(parent:FindFirstAncestorOfClass("Model"))
+                    
+                    if not isGenerator and not isPallet and not isPlayer then
+                        part.Transparency = 1
+                    end
+                end
+            elseif part:IsA("ParticleEmitter") or part:IsA("Trail") or part:IsA("Smoke") or part:IsA("Fire") then
+                local parent = part.Parent
+                if parent then
+                    local isGenerator = parent.Name:lower():find("generator") or parent.Name:lower():find("gen") or parent:FindFirstAncestor("Generator")
+                    local isPallet = parent.Name:lower():find("pallet") or parent:FindFirstAncestor("Pallet")
+                    local isPlayer = parent:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(parent:FindFirstAncestorOfClass("Model"))
+                    
+                    if not isGenerator and not isPallet and not isPlayer then
+                        part.Enabled = false
+                    end
+                end
+            end
+        end
+    else
+        -- Kembalikan semua part ke semula
+        for part, data in pairs(lowGraphicsParts) do
+            if part and part.Parent then
+                part.Material = data.Material
+                part.Color = data.Color
+                part.Transparency = data.Transparency
+                part.Reflectance = data.Reflectance
+            end
+        end
+        lowGraphicsParts = {}
+        
+        -- Kembalikan Textures/Decals
+        for _, part in pairs(Workspace:GetDescendants()) do
+            if part:IsA("Texture") or part:IsA("Decal") then
+                local parent = part.Parent
+                if parent then
+                    local isGenerator = parent.Name:lower():find("generator") or parent.Name:lower():find("gen") or parent:FindFirstAncestor("Generator")
+                    local isPallet = parent.Name:lower():find("pallet") or parent:FindFirstAncestor("Pallet")
+                    local isPlayer = parent:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(parent:FindFirstAncestorOfClass("Model"))
+                    
+                    if not isGenerator and not isPallet and not isPlayer then
+                        part.Transparency = 0
+                    end
+                end
+            elseif part:IsA("ParticleEmitter") or part:IsA("Trail") or part:IsA("Smoke") or part:IsA("Fire") then
+                local parent = part.Parent
+                if parent then
+                    local isGenerator = parent.Name:lower():find("generator") or parent.Name:lower():find("gen") or parent:FindFirstAncestor("Generator")
+                    local isPallet = parent.Name:lower():find("pallet") or parent:FindFirstAncestor("Pallet")
+                    local isPlayer = parent:FindFirstAncestorOfClass("Model") and Players:GetPlayerFromCharacter(parent:FindFirstAncestorOfClass("Model"))
+                    
+                    if not isGenerator and not isPallet and not isPlayer then
+                        part.Enabled = true
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Label "Low Graphics Mode"
+local LabelLow = Instance.new("TextLabel", SettingsFrame)
+LabelLow.Size = UDim2.new(1, -10, 0, 25)
+LabelLow.Position = UDim2.new(0, 5, 0, 5)
+LabelLow.BackgroundTransparency = 1
+LabelLow.Text = "Low Graphics Mode"
+LabelLow.TextColor3 = Color3.fromRGB(180, 180, 180)
+LabelLow.TextSize = 14
+LabelLow.Font = Enum.Font.SourceSansBold
+LabelLow.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Tombol ON/OFF Low Graphics
+local LowBtn = Instance.new("TextButton", SettingsFrame)
+LowBtn.Size = UDim2.new(0, 60, 0, 30)
+LowBtn.Position = UDim2.new(1, -65, 0, 5)
+LowBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)  -- Merah (OFF)
+LowBtn.Text = "OFF"
+LowBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LowBtn.TextSize = 14
+LowBtn.Font = Enum.Font.SourceSansBold
+LowBtn.BorderSizePixel = 0
+Instance.new("UICorner", LowBtn).CornerRadius = UDim.new(0, 6)
+
+LowBtn.MouseButton1Click:Connect(function()
+    lowGraphics = ToggleSettings(LowBtn, lowGraphics)
+    ApplyLowGraphics(lowGraphics)
+    PlaySound(SOUNDS.CLICK, 0.15)
+end)
+
+-- Info Low Graphics
+local InfoLow = Instance.new("TextLabel", SettingsFrame)
+InfoLow.Size = UDim2.new(1, -10, 0, 40)
+InfoLow.Position = UDim2.new(0, 5, 0, 40)
+InfoLow.BackgroundTransparency = 1
+InfoLow.Text = "🔘 Menghilangkan warna dan efek pada maps\n🔘 Hanya menyisakan Generator dan Pallet"
+InfoLow.TextColor3 = Color3.fromRGB(150, 150, 150)
+InfoLow.TextSize = 11
+InfoLow.Font = Enum.Font.SourceSans
+InfoLow.TextXAlignment = Enum.TextXAlignment.Left
+InfoLow.TextYAlignment = Enum.TextYAlignment.Top
 
 -- ====== TAB NAVIGATION ======
 local function ShowPage(page, tab)
     Page0.Visible = false
     Page1.Visible = false
     Page2.Visible = false
-    Page3.Visible = false
     Page4.Visible = false
     
     for _, child in ipairs(SidebarScroll:GetChildren()) do
@@ -573,7 +726,6 @@ end
 AboutTab.MouseButton1Click:Connect(function() ShowPage(Page0, AboutTab) end)
 Tab1.MouseButton1Click:Connect(function() ShowPage(Page1, Tab1) end)
 Tab2.MouseButton1Click:Connect(function() ShowPage(Page2, Tab2) end)
-Tab3.MouseButton1Click:Connect(function() ShowPage(Page3, Tab3) end)
 Tab4.MouseButton1Click:Connect(function() ShowPage(Page4, Tab4) end)
 
 ShowPage(Page0, AboutTab)
