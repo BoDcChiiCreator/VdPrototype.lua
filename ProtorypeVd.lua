@@ -231,7 +231,6 @@ local function CreateSidebarItem(text)
     stroke.Thickness = 1
     stroke.Transparency = 0.5
     
-    -- Suara klik untuk setiap tab
     btn.MouseButton1Click:Connect(function()
         PlaySound(SOUNDS.CLICK, 0.15)
     end)
@@ -261,7 +260,6 @@ local AboutFrame = Instance.new("Frame", Page0)
 AboutFrame.Size = UDim2.new(1, 0, 1, 0)
 AboutFrame.BackgroundTransparency = 1
 
--- Profile Section
 local ProfileFrame = Instance.new("Frame", AboutFrame)
 ProfileFrame.Size = UDim2.new(1, 0, 0, 100)
 ProfileFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -319,7 +317,6 @@ Line1.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 Line1.BackgroundTransparency = 0.5
 Line1.BorderSizePixel = 0
 
--- Info Channel
 local ChannelFrame = Instance.new("Frame", AboutFrame)
 ChannelFrame.Size = UDim2.new(1, 0, 0, 70)
 ChannelFrame.Position = UDim2.new(0, 0, 0, 110)
@@ -362,7 +359,6 @@ Line2.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
 Line2.BackgroundTransparency = 0.5
 Line2.BorderSizePixel = 0
 
--- Info Script
 local ScriptFrame = Instance.new("Frame", AboutFrame)
 ScriptFrame.Size = UDim2.new(1, 0, 0, 60)
 ScriptFrame.Position = UDim2.new(0, 0, 0, 190)
@@ -394,11 +390,9 @@ local EspFrame = Instance.new("Frame", Page1)
 EspFrame.Size = UDim2.new(1, 0, 1, 0)
 EspFrame.BackgroundTransparency = 1
 
--- Variabel ESP
 local espSurvival = false
 local espKiller = false
 
--- Fungsi toggle dengan warna ON=Hijau, OFF=Merah
 local function ToggleESP(btn, state)
     state = not state
     if state then
@@ -413,7 +407,6 @@ local function ToggleESP(btn, state)
     return state
 end
 
--- Fungsi update ESP
 local function UpdateESP()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= Players.LocalPlayer and player.Character then
@@ -447,7 +440,6 @@ local function UpdateESP()
     end
 end
 
--- Label "ESP Survival"
 local LabelSurv = Instance.new("TextLabel", EspFrame)
 LabelSurv.Size = UDim2.new(1, -10, 0, 25)
 LabelSurv.Position = UDim2.new(0, 5, 0, 5)
@@ -458,7 +450,6 @@ LabelSurv.TextSize = 14
 LabelSurv.Font = Enum.Font.SourceSansBold
 LabelSurv.TextXAlignment = Enum.TextXAlignment.Left
 
--- Tombol ON/OFF ESP Survival
 local EspSurvBtn = Instance.new("TextButton", EspFrame)
 EspSurvBtn.Size = UDim2.new(0, 60, 0, 30)
 EspSurvBtn.Position = UDim2.new(1, -65, 0, 5)
@@ -476,7 +467,6 @@ EspSurvBtn.MouseButton1Click:Connect(function()
     PlaySound(SOUNDS.CLICK, 0.15)
 end)
 
--- Label "ESP Killer"
 local LabelKill = Instance.new("TextLabel", EspFrame)
 LabelKill.Size = UDim2.new(1, -10, 0, 25)
 LabelKill.Position = UDim2.new(0, 5, 0, 40)
@@ -487,7 +477,6 @@ LabelKill.TextSize = 14
 LabelKill.Font = Enum.Font.SourceSansBold
 LabelKill.TextXAlignment = Enum.TextXAlignment.Left
 
--- Tombol ON/OFF ESP Killer
 local EspKillBtn = Instance.new("TextButton", EspFrame)
 EspKillBtn.Size = UDim2.new(0, 60, 0, 30)
 EspKillBtn.Position = UDim2.new(1, -65, 0, 40)
@@ -505,7 +494,6 @@ EspKillBtn.MouseButton1Click:Connect(function()
     PlaySound(SOUNDS.CLICK, 0.15)
 end)
 
--- Update ESP otomatis
 spawn(function()
     while wait(0.5) do
         if espSurvival or espKiller then
@@ -514,7 +502,6 @@ spawn(function()
     end
 end)
 
--- Cleanup saat player keluar
 Players.PlayerRemoving:Connect(function(player)
     if player.Character then
         local highlight = player.Character:FindFirstChild("BD_EspHighlight")
@@ -522,16 +509,14 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
--- ====== PAGE 2: SURVIVAL (Auto Perfect Generator & Anti Fail) ======
+-- ====== PAGE 2: SURVIVAL (Auto Perfect Generator & Anti Fail - FIXED) ======
 local SurvFrame = Instance.new("Frame", Page2)
 SurvFrame.Size = UDim2.new(1, 0, 1, 0)
 SurvFrame.BackgroundTransparency = 1
 
--- Variabel fitur Survival
 local autoPerfect = false
 local antiFail = false
 
--- Fungsi toggle dengan warna ON=Hijau, OFF=Merah
 local function ToggleSurv(btn, state)
     state = not state
     if state then
@@ -546,7 +531,7 @@ local function ToggleSurv(btn, state)
     return state
 end
 
--- ====== AUTO PERFECT GENERATOR ======
+-- AUTO PERFECT GENERATOR
 local LabelPerfect = Instance.new("TextLabel", SurvFrame)
 LabelPerfect.Size = UDim2.new(1, -10, 0, 25)
 LabelPerfect.Position = UDim2.new(0, 5, 0, 5)
@@ -573,7 +558,7 @@ PerfectBtn.MouseButton1Click:Connect(function()
     PlaySound(SOUNDS.CLICK, 0.15)
 end)
 
--- ====== ANTI FAIL GENERATOR ======
+-- ANTI FAIL GENERATOR
 local LabelAntiFail = Instance.new("TextLabel", SurvFrame)
 LabelAntiFail.Size = UDim2.new(1, -10, 0, 25)
 LabelAntiFail.Position = UDim2.new(0, 5, 0, 40)
@@ -600,7 +585,6 @@ AntiFailBtn.MouseButton1Click:Connect(function()
     PlaySound(SOUNDS.CLICK, 0.15)
 end)
 
--- Info Survival
 local InfoSurv = Instance.new("TextLabel", SurvFrame)
 InfoSurv.Size = UDim2.new(1, -10, 0, 40)
 InfoSurv.Position = UDim2.new(0, 5, 0, 75)
@@ -612,8 +596,34 @@ InfoSurv.Font = Enum.Font.SourceSans
 InfoSurv.TextXAlignment = Enum.TextXAlignment.Left
 InfoSurv.TextYAlignment = Enum.TextYAlignment.Top
 
--- ====== LOGIKA AUTO PERFECT & ANTI FAIL ======
--- Hook ke metatable untuk mencegah fail/explode
+-- ====== LOGIKA AUTO PERFECT & ANTI FAIL (FIXED) ======
+
+-- Fungsi untuk mengirim success ke generator
+local function SendGeneratorSuccess()
+    pcall(function()
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("RemoteEvent") then
+                local name = obj.Name:lower()
+                if name:find("skill") or name:find("generator") or name:find("gen") or name:find("success") or name:find("complete") then
+                    pcall(function()
+                        obj:FireServer()
+                    end)
+                end
+            end
+        end
+    end)
+end
+
+-- AUTO PERFECT - Loop cepat
+spawn(function()
+    while wait(0.05) do
+        if autoPerfect then
+            SendGeneratorSuccess()
+        end
+    end
+end)
+
+-- ANTI FAIL - Cegah fail/explode dan kirim success biar gak stuck
 local mt = getrawmetatable(game)
 if mt then
     local old = mt.__namecall
@@ -622,21 +632,13 @@ if mt then
     mt.__namecall = newcclosure(function(self, ...)
         local method = getnamecallmethod()
         
-        -- Anti Fail Generator - Cegah fail/explode
         if antiFail and (method == "FireServer" or method == "InvokeServer") then
             local selfStr = tostring(self):lower()
             if selfStr:find("fail") or selfStr:find("explode") or selfStr:find("skillcheck") then
-                return nil
-            end
-        end
-        
-        -- Auto Perfect Generator - Selalu success
-        if autoPerfect and (method == "FireServer" or method == "InvokeServer") then
-            local selfStr = tostring(self):lower()
-            if selfStr:find("skillcheck") or selfStr:find("generator") then
+                -- Kirim success biar state selesai dan gak stuck
                 pcall(function()
                     if self and self.Parent then
-                        local successEvent = self.Parent:FindFirstChild("Success") or self.Parent:FindFirstChild("Complete")
+                        local successEvent = self.Parent:FindFirstChild("Success") or self.Parent:FindFirstChild("Complete") or self.Parent:FindFirstChild("Done")
                         if successEvent and successEvent:IsA("RemoteEvent") then
                             successEvent:FireServer()
                         end
@@ -652,15 +654,15 @@ if mt then
     setreadonly(mt, true)
 end
 
--- Auto Perfect - Loop untuk cegah fail
+-- ANTI FAIL - Backup loop untuk cegah stuck
 spawn(function()
     while wait(0.1) do
-        if autoPerfect then
+        if antiFail then
             pcall(function()
                 for _, obj in pairs(Workspace:GetDescendants()) do
-                    if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+                    if obj:IsA("RemoteEvent") then
                         local name = obj.Name:lower()
-                        if name:find("skill") or name:find("generator") or name:find("gen") then
+                        if name:find("fail") or name:find("explode") then
                             local parent = obj.Parent
                             if parent then
                                 local success = parent:FindFirstChild("Success") or parent:FindFirstChild("Complete") or parent:FindFirstChild("Done")
@@ -674,6 +676,25 @@ spawn(function()
             end)
         end
         wait(0.5)
+    end
+end)
+
+-- FIX KARAKTER STUCK - Reset velocity
+spawn(function()
+    while wait(0.3) do
+        if antiFail then
+            pcall(function()
+                local player = Players.LocalPlayer
+                if player and player.Character then
+                    local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                    if rootPart then
+                        -- Reset velocity biar gak stuck
+                        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                        rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                    end
+                end
+            end)
+        end
     end
 end)
 
